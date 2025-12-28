@@ -7,15 +7,25 @@ import re
 import time
 from dotenv import load_dotenv
 import alpaca_trade_api as tradeapi
+import pathlib
+from datetime import date
 
-# 1. Load API Keys
-load_dotenv()
-ALPACA_KEY = os.getenv("ALPACA_KEY")
-ALPACA_SECRET = os.getenv("ALPACA_SECRET")
+import config
 
-# 2. Connect to Alpaca (Paper Trading)
-BASE_URL = "https://paper-api.alpaca.markets"
-api = tradeapi.REST(ALPACA_KEY, ALPACA_SECRET, BASE_URL, api_version="v2")
+# 1. Select Model and Get API
+model_info = config.select_model()
+api = config.get_alpaca_api(model_info)
+
+# 2. Alpaca Connection (Setup in config.py)
+print(f"✅ Connected to Alpaca for {model_info['name']}")
+
+# Execution Logging
+execution_logs = []
+
+def log_execution(msg):
+    """Prints and stores logging info for file saving."""
+    print(msg)
+    execution_logs.append(msg)
 
 HEADER_MAP = {
     "TICKER": ["TICKER", "TICK", "SYMBOL"],
@@ -63,30 +73,30 @@ def map_headers(row_keys):
 
 def print_preflight_status():
     """Print current account status, positions, and open orders before starting."""
+    log_execution("\n" + "=" * 50)
+    log_execution(f"📊 ALPACA PRE-FLIGHT STATUS ({model_info['name']})")
+    log_execution("=" * 50)
     try:
         account = api.get_account()
         positions = api.list_positions()
         orders = api.list_orders(status="open")
 
-        print("\n" + "=" * 50)
-        print("📊 ALPACA PRE-FLIGHT STATUS")
-        print("=" * 50)
-        print(f"💰 Equity: ${float(account.equity):,.2f}")
-        print(f"💸 Buying Power: ${float(account.buying_power):,.2f}")
+        log_execution(f"💰 Equity: ${float(account.equity):,.2f}")
+        log_execution(f"💸 Buying Power: ${float(account.buying_power):,.2f}")
 
-        print("\n📂 Current Positions:")
+        log_execution("\n📂 Current Positions:")
         if not positions:
-            print("   (No open positions)")
+            log_execution("   (No open positions)")
         else:
             for p in positions:
-                print(
+                log_execution(
                     f"   • {p.symbol}: {p.qty} shares @ ${float(p.avg_entry_price):,.2f} "
                     f"(Current: ${float(p.current_price):,.2f})"
                 )
 
-        print("\n📝 Open Orders:")
+        log_execution("\n📝 Open Orders:")
         if not orders:
-            print("   (No open orders)")
+            log_execution("   (No open orders)")
         else:
             for o in orders:
                 type_str = f"{o.type} {o.side}".upper()
@@ -95,11 +105,11 @@ def print_preflight_status():
                     if o.limit_price
                     else (f"Stop @ ${float(o.stop_price):,.2f}" if o.stop_price else "MARKET")
                 )
-                print(f"   • {o.symbol}: {type_str} {o.qty} shares {price_str} ({o.status})")
+                log_execution(f"   • {o.symbol}: {type_str} {o.qty} shares {price_str} ({o.status})")
 
-        print("\n" + "=" * 50 + "\n")
+        log_execution("\n" + "=" * 50 + "\n")
     except Exception as e:
-        print(f"⚠️ Could not fetch account status: {e}")
+        log_execution(f"⚠️ Could not fetch account status: {e}")
 
 
 def parse_clipboard_trades():
@@ -112,11 +122,11 @@ def parse_clipboard_trades():
     Always returns a list (possibly empty).
     """
     text = pyperclip.paste().strip()
-    print("📋 Analyzing Clipboard Strategy...\n")
+    log_execution("📋 Analyzing Clipboard Strategy...\n")
 
     # Quick NO_TRADES detection (text-level)
     if "NO_TRADES" in text.upper() or "NO TRADES" in text.upper():
-        print("🛑 AI Signal: NO TRADES TODAY.")
+        log_execution("🛑 AI Signal: NO TRADES TODAY.")
         return []
 
     lines = [l.strip() for l in text.splitlines() if l.strip()]
@@ -141,12 +151,12 @@ def parse_clipboard_trades():
                 trade = {canonical: row.get(original) for canonical, original in h_map.items()}
                 if trade.get("ACTION") and trade.get("TICKER"):
                     if clean_val(trade.get("ACTION")) == "NO_TRADES":
-                        print("🛑 AI Signal: NO TRADES TODAY (CSV row).")
+                        log_execution("🛑 AI Signal: NO TRADES TODAY (CSV row).")
                         return []
                     trades.append(trade)
 
         if trades:
-            print(f"🔎 Found {len(trades)} trade(s) (CSV).")
+            log_execution(f"🔎 Found {len(trades)} trade(s) (CSV).")
             return trades
 
     # -----------------------------
@@ -177,12 +187,12 @@ def parse_clipboard_trades():
                 trade = {canonical: row.get(original) for canonical, original in h_map.items()}
                 if trade.get("ACTION") and trade.get("TICKER"):
                     if clean_val(trade.get("ACTION")) == "NO_TRADES":
-                        print("🛑 AI Signal: NO TRADES TODAY (table row).")
+                        log_execution("🛑 AI Signal: NO TRADES TODAY (table row).")
                         return []
                     trades.append(trade)
 
     if trades:
-        print(f"🔎 Found {len(trades)} trade(s) (Markdown table).")
+        log_execution(f"🔎 Found {len(trades)} trade(s) (Markdown table).")
         return trades
 
     # -----------------------------
@@ -204,10 +214,10 @@ def parse_clipboard_trades():
         )
 
     if trades:
-        print(f"🔎 Found {len(trades)} trade(s) (Regex fallback).")
+        log_execution(f"🔎 Found {len(trades)} trade(s) (Regex fallback).")
         return trades
 
-    print("⚠️ No valid trade data found in clipboard.")
+    log_execution("⚠️ No valid trade data found in clipboard.")
     return []
 
 
@@ -215,10 +225,10 @@ def manage_hold_protection(ticker, stop_loss_price, dry_run=False):
     try:
         qty = int(api.get_position(ticker).qty)
     except Exception:
-        print(f"   ⚠️ No open position found for {ticker} to protect.")
+        log_execution(f"   ⚠️ No open position found for {ticker} to protect.")
         return
 
-    print(f"\n🛡️ SYNCING PROTECTION: {ticker} (Target Stop: ${stop_loss_price:.2f})")
+    log_execution(f"\n🛡️ SYNCING PROTECTION: {ticker} (Target Stop: ${stop_loss_price:.2f})")
 
     open_orders = api.list_orders(status="open", symbols=[ticker])
 
@@ -234,8 +244,8 @@ def manage_hold_protection(ticker, stop_loss_price, dry_run=False):
                 f"@ ${float(o.limit_price):.2f}" if o.limit_price
                 else (f"Stop @ ${float(o.stop_price):.2f}" if o.stop_price else "MARKET")
             )
-            print(f"   ⚠️ Conflict: Open SELL order exists for {ticker}: {o.type.upper()} {price_str} ({o.status})")
-        print(f"   ⚠️ Skipping STOP placement for {ticker} because shares are reserved by an open SELL order.")
+            log_execution(f"   ⚠️ Conflict: Open SELL order exists for {ticker}: {o.type.upper()} {price_str} ({o.status})")
+        log_execution(f"   ⚠️ Skipping STOP placement for {ticker} because shares are reserved by an open SELL order.")
         return
 
     # Manage existing STOP sell orders
@@ -246,35 +256,35 @@ def manage_hold_protection(ticker, stop_loss_price, dry_run=False):
             current_stop = float(order.stop_price)
             # If a replace is already pending, don't spam more actions
             if order.status and "PENDING" in order.status.upper():
-                print(f"   ⏳ Stop order update already pending for {ticker} ({order.status}). Skipping for now.")
+                log_execution(f"   ⏳ Stop order update already pending for {ticker} ({order.status}). Skipping for now.")
                 return
 
             if abs(current_stop - stop_loss_price) < 0.01:
-                print(f"   ✅ Already Protected: Existing stop for {ticker} matches ${current_stop:.2f}")
+                log_execution(f"   ✅ Already Protected: Existing stop for {ticker} matches ${current_stop:.2f}")
                 return
 
-            print(f"   🔄 Updating: Found stop @ ${current_stop:.2f}. Replacing with ${stop_loss_price:.2f}")
+            log_execution(f"   🔄 Updating: Found stop @ ${current_stop:.2f}. Replacing with ${stop_loss_price:.2f}")
             if dry_run:
-                print(f"   [DRY RUN] Would replace stop-loss for {ticker} to ${stop_loss_price:.2f}")
+                log_execution(f"   [DRY RUN] Would replace stop-loss for {ticker} to ${stop_loss_price:.2f}")
                 return
 
             try:
                 api.replace_order(order.id, stop_price=stop_loss_price)
-                print(f"   ✅ SUCCESS: Stop-loss update requested for {ticker}.")
+                log_execution(f"   ✅ SUCCESS: Stop-loss update requested for {ticker}.")
                 return
             except Exception as e:
-                print(f"   ⚠️ Replace failed: {e}. Falling back to Cancel/Re-submit.")
+                log_execution(f"   ⚠️ Replace failed: {e}. Falling back to Cancel/Re-submit.")
                 try:
                     api.cancel_order(order.id)
                     time.sleep(1)
                 except Exception as ce:
-                    print(f"   ⚠️ Cancel failed: {ce}.")
+                    log_execution(f"   ⚠️ Cancel failed: {ce}.")
                     return
     else:
-        print(f"   ➕ Missing Protection: No stop-loss found for {ticker}.")
+        log_execution(f"   ➕ Missing Protection: No stop-loss found for {ticker}.")
 
     if dry_run:
-        print(f"   [DRY RUN] Would place stop-loss @ ${stop_loss_price:.2f}")
+        log_execution(f"   [DRY RUN] Would place stop-loss @ ${stop_loss_price:.2f}")
         return
 
     try:
@@ -286,9 +296,9 @@ def manage_hold_protection(ticker, stop_loss_price, dry_run=False):
             time_in_force="gtc",
             stop_price=stop_loss_price,
         )
-        print(f"   ✅ SUCCESS: New stop-loss placed for {ticker} @ ${stop_loss_price:.2f}")
+        log_execution(f"   ✅ SUCCESS: New stop-loss placed for {ticker} @ ${stop_loss_price:.2f}")
     except Exception as e:
-        print(f"   ❌ FAILED to place stop-loss: {e}")
+        log_execution(f"   ❌ FAILED to place stop-loss: {e}")
 
 def execute_trade(trade, dry_run=False):
     action = clean_val(trade.get("ACTION"))
@@ -303,7 +313,7 @@ def execute_trade(trade, dry_run=False):
 
     # Ignore NO_TRADES if it slips through
     if action == "NO_TRADES":
-        print("🛑 NO_TRADES row encountered. Skipping.")
+        log_execution("🛑 NO_TRADES row encountered. Skipping.")
         return
 
     if action == "HOLD":
@@ -315,57 +325,80 @@ def execute_trade(trade, dry_run=False):
         if stop_price:
             manage_hold_protection(ticker, stop_price, dry_run=dry_run)
         else:
-            print(f"\n✋ HOLDING: {ticker} (No stop-loss specified)")
+            log_execution(f"\n✋ HOLDING: {ticker} (No stop-loss specified)")
         return
-
     try:
         if action == "SELL":
-            print(f"\n📉 PROCESSING SELL: {ticker}")
+            log_execution(f"\n📉 PROCESSING SELL: {ticker}")
             try:
+                # --- NEW: Clear any open orders for this ticker first ---
+                open_orders = api.list_orders(status="open", symbols=[ticker])
+                if open_orders:
+                    log_execution(f"   🧹 Clearing {len(open_orders)} open order(s) for {ticker} before selling.")
+                    for o in open_orders:
+                        if not dry_run:
+                            api.cancel_order(o.id)
+                        else:
+                            log_execution(f"   [DRY RUN] Would cancel order {o.id}")
+                    
+                    if not dry_run:
+                        # Polling loop: Wait up to 10 seconds for orders to clear
+                        attempts = 0
+                        while attempts < 10:
+                            time.sleep(1)
+                            remaining = api.list_orders(status="open", symbols=[ticker])
+                            if not remaining:
+                                break
+                            attempts += 1
+                            log_execution(f"   ⏳ Waiting for orders to clear ({attempts}/10)...")
+                        
+                        if attempts == 10:
+                            log_execution(f"   ⚠️ WARNING: Orders for {ticker} did not clear in time. Sell might fail.")
+
                 try:
                     api.get_position(ticker)
                 except Exception:
-                    print(f"   ✅ Position already closed or doesn't exist for {ticker}.")
+                    log_execution(f"   ✅ Position already closed or doesn't exist for {ticker}.")
                     return
 
                 if qty_str and "ALL" in qty_str:
                     if dry_run:
-                        print(f"   [DRY RUN] Would close position for {ticker}.")
+                        log_execution(f"   [DRY RUN] Would close position for {ticker}.")
                     else:
                         api.close_position(ticker)
                 else:
                     qty = int(qty_str) if qty_str else 0
                     if qty <= 0:
-                        print(f"   ⚠️ Invalid qty for SELL {ticker}: {qty_str}. Skipping.")
+                        log_execution(f"   ⚠️ Invalid qty for SELL {ticker}: {qty_str}. Skipping.")
                         return
 
                     if dry_run:
-                        print(f"   [DRY RUN] Would submit MARKET sell {qty} {ticker}.")
+                        log_execution(f"   [DRY RUN] Would submit MARKET sell {qty} {ticker}.")
                     else:
                         api.submit_order(symbol=ticker, qty=qty, side="sell", type="market", time_in_force="day")
 
-                print(f"   ✅ SELL submitted for {ticker}")
+                log_execution(f"   ✅ SELL submitted for {ticker}")
             except Exception as e:
-                print(f"   ❌ SELL FAILED: {e}")
+                log_execution(f"   ❌ SELL FAILED: {e}")
             return
 
         if action == "BUY":
-            print(f"\n🚀 PROCESSING BUY: {ticker}")
+            log_execution(f"\n🚀 PROCESSING BUY: {ticker}")
 
             # --- CHECK 1: Ticker Validity ---
             try:
                 asset = api.get_asset(ticker)
                 if not asset.tradable:
-                    print(f"   ❌ Invalid Ticker: {ticker} is not tradable on Alpaca.")
+                    log_execution(f"   ❌ Invalid Ticker: {ticker} is not tradable on Alpaca.")
                     return
             except Exception:
-                print(f"   ❌ Invalid Ticker: Could not find {ticker} on Alpaca.")
+                log_execution(f"   ❌ Invalid Ticker: Could not find {ticker} on Alpaca.")
                 return
 
             # --- CHECK 2: Existing Position (Idempotency) ---
             try:
                 pos = api.get_position(ticker)
-                print(f"   ⚠️ Already Owned: You currently hold {pos.qty} shares of {ticker}. Skipping execution.")
+                log_execution(f"   ⚠️ Already Owned: You currently hold {pos.qty} shares of {ticker}. Skipping execution.")
                 return
             except Exception:
                 pass
@@ -374,13 +407,13 @@ def execute_trade(trade, dry_run=False):
             open_orders = api.list_orders(status="open", symbols=[ticker])
             buy_orders = [o for o in open_orders if o.side == "buy"]
             if buy_orders:
-                print(f"   ⚠️ Pending Order: There is already an open BUY order for {ticker}. Skipping duplicates.")
+                log_execution(f"   ⚠️ Pending Order: There is already an open BUY order for {ticker}. Skipping duplicates.")
                 return
 
             qty = int(qty_str) if qty_str else 0
             limit_price = float(limit_price_str) if limit_price_str else 0.0
             if qty <= 0 or limit_price <= 0:
-                print(f"   ⚠️ Skipping {ticker}: Missing/invalid Qty or LIMIT_PRICE.")
+                log_execution(f"   ⚠️ Skipping {ticker}: Missing/invalid Qty or LIMIT_PRICE.")
                 return
 
             stop_price = float(stop_loss_str) if stop_loss_str else None
@@ -388,16 +421,16 @@ def execute_trade(trade, dry_run=False):
 
             # Guard: STOP_LOSS must be < LIMIT_PRICE if provided
             if stop_price is not None and stop_price >= limit_price:
-                print(f"   ❌ Invalid BUY: STOP_LOSS ({stop_price}) >= LIMIT_PRICE ({limit_price}). Skipping.")
+                log_execution(f"   ❌ Invalid BUY: STOP_LOSS ({stop_price}) >= LIMIT_PRICE ({limit_price}). Skipping.")
                 return
 
             account = api.get_account()
             bp = float(account.buying_power)
             est_cost = qty * limit_price
-            print(f"   Order: BUY {qty} {ticker} @ ${limit_price:.2f} (Est. Cost: ${est_cost:.2f})")
+            log_execution(f"   Order: BUY {qty} {ticker} @ ${limit_price:.2f} (Est. Cost: ${est_cost:.2f})")
 
             if est_cost > bp:
-                print(f"   ⚠️ WARNING: Insufficient Buying Power! (Need ${est_cost:.2f}, Have ${bp:.2f})")
+                log_execution(f"   ⚠️ WARNING: Insufficient Buying Power! (Need ${est_cost:.2f}, Have ${bp:.2f})")
                 if not dry_run:
                     return
 
@@ -424,12 +457,39 @@ def execute_trade(trade, dry_run=False):
                 params["order_class"] = "simple"
 
             if dry_run:
-                print("   [DRY RUN] Would place buy order.")
+                log_execution("   [DRY RUN] Would place buy order.")
             else:
                 api.submit_order(**params)
-                print("   ✅ SUCCESS: Buy order placed!")
+                log_execution("   ✅ SUCCESS: Buy order placed!")
     except Exception as e:
-        print(f"   ❌ EXECUTION ERROR for {ticker}: {e}")
+        log_execution(f"   ❌ EXECUTION ERROR for {ticker}: {e}")
+
+
+def save_execution_log():
+    """Saves the recorded execution log to a file."""
+    if not execution_logs:
+        return
+
+    log_dir = pathlib.Path(f"logs/trades/{date.today()}")
+    log_dir.mkdir(parents=True, exist_ok=True)
+    
+    file_name = f"{model_info['name'].lower().replace(' ', '_')}.md"
+    log_file = log_dir / file_name
+    
+    # Format as markdown
+    content = "# Trade Execution Log\n\n"
+    content += f"**Model:** {model_info['name']}\n"
+    content += f"**Date:** {date.today()}\n\n"
+    content += "```text\n"
+    content += "\n".join(execution_logs)
+    content += "\n```\n"
+
+    try:
+        with open(log_file, "w", encoding="utf-8") as f:
+            f.write(content)
+        print(f"\n📂 EXECUTION LOG SAVED TO: {log_file}")
+    except Exception as e:
+        print(f"\n❌ Failed to save execution log: {e}")
 
 
 if __name__ == "__main__":
@@ -441,4 +501,6 @@ if __name__ == "__main__":
     trades = parse_clipboard_trades()
     for t in trades:
         execute_trade(t, dry_run=args.dry_run)
+    
+    save_execution_log()
 

@@ -3,18 +3,15 @@ from dotenv import load_dotenv
 import alpaca_trade_api as tradeapi
 from datetime import datetime, timedelta
 
-# 1. Load API Keys
-load_dotenv()
-ALPACA_KEY = os.getenv("ALPACA_KEY")
-ALPACA_SECRET = os.getenv("ALPACA_SECRET")
+import config
 
-# 2. Connect to Alpaca
-BASE_URL = 'https://paper-api.alpaca.markets'
-api = tradeapi.REST(ALPACA_KEY, ALPACA_SECRET, BASE_URL, api_version='v2')
+# 1. Select Model and Get API
+model_info = config.select_model()
+api = config.get_alpaca_api(model_info)
 
 def get_history():
     print("\n" + "="*60)
-    print("📜 ALPACA ACCOUNT ACTIVITY (Last 24 Hours)")
+    print(f"📜 ALPACA ACCOUNT ACTIVITY ({model_info['name']}) - Last 24 Hours")
     print("="*60)
     
     try:

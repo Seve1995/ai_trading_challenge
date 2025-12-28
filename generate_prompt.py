@@ -4,34 +4,37 @@ import alpaca_trade_api as tradeapi
 import yfinance as yf
 from dotenv import load_dotenv
 from datetime import date
+import json
+import pathlib
+
+import config
 
 # -------------------------------------------------
-# 1. Load API Keys
+# 1. Select Model and Get API
 # -------------------------------------------------
-load_dotenv()
-ALPACA_KEY = os.getenv("ALPACA_KEY")
-ALPACA_SECRET = os.getenv("ALPACA_SECRET")
-
-# -------------------------------------------------
-# 2. Connect to Alpaca (Paper Trading)
-# -------------------------------------------------
-api = tradeapi.REST(
-    ALPACA_KEY,
-    ALPACA_SECRET,
-    "https://paper-api.alpaca.markets",
-    api_version="v2"
-)
+model_info = config.select_model()
+api = config.get_alpaca_api(model_info)
 
 # -------------------------------------------------
 # Macro Data
 # -------------------------------------------------
+MACRO_CACHE_DIR = pathlib.Path("logs/macro_cache")
+
 def get_macro_data():
     """
-    Fetches standardized macro data:
-    - TNX: US 10Y Yield (% change vs prior close)
-    - DXY: Dollar Index direction + % change
-      (fallback to UUP ETF if index fails)
+    Fetches standardized macro data. Caches results for the day to avoid redundant calls.
     """
+    today_str = date.today().isoformat()
+    cache_file = MACRO_CACHE_DIR / f"{today_str}.json"
+
+    if cache_file.exists():
+        try:
+            with open(cache_file, "r") as f:
+                data = json.load(f)
+                print(f"   🏠 Loaded Macro Data from cache ({today_str})")
+                return data["tnx"], data["dxy"]
+        except Exception as e:
+            print(f"⚠️ Cache read error: {e}. Re-fetching...")
 
     # --- TNX ---
     try:
@@ -68,6 +71,15 @@ def get_macro_data():
             dxy_str = "DXY: Not enough data"
     except Exception as e:
         dxy_str = f"DXY: Data Error ({e})"
+
+    # Save to cache
+    try:
+        MACRO_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        with open(cache_file, "w") as f:
+            json.dump({"tnx": tnx_str, "dxy": dxy_str}, f)
+        print(f"   💾 Macro Data cached for {today_str}")
+    except Exception as e:
+        print(f"⚠️ Cache write error: {e}")
 
     return tnx_str, dxy_str
 
@@ -115,7 +127,7 @@ def get_technical_data(symbol: str) -> str:
 # Prompt Generator
 # -------------------------------------------------
 def generate_daily_prompt():
-    print(f"⏳ Generating AI Prompt for {date.today()}...")
+    print(f"⏳ Generating {model_info['name']} AI Prompt for {date.today()}...")
 
     try:
         account = api.get_account()
@@ -152,7 +164,7 @@ def generate_daily_prompt():
     # -------------------------------------------------
     prompt_text = f"""**CURRENT DATE:** {date.today()}
 
-**PORTFOLIO STATUS (ALPACA PAPER):**
+**PORTFOLIO STATUS (ALPACA PAPER - {model_info['name']}):**
 - Cash: ${cash:.2f}
 - Equity: ${equity:.2f}
 
@@ -173,7 +185,7 @@ Strictly follow all rules. Skip trades if uncertain.
 ------------------------------------------------------------
 ## OUTPUT RULES (MANDATORY)
 You MUST output exactly TWO sections:
-A) WEEKLY/DAILY NOTES (bullets, max 8)
+A) DAILY NOTES (bullets, max 8)
 B) EXECUTION_TABLE (the ONLY table)
 No extra text after the table.
 
@@ -246,6 +258,22 @@ If no actions:
 
     pyperclip.copy(prompt_text)
     print("✅ PROMPT COPIED TO CLIPBOARD")
+
+    # -------------------------------------------------
+    # LOG PROMPT TO FILE
+    # -------------------------------------------------
+    log_dir = pathlib.Path(f"logs/prompts/{date.today()}")
+    log_dir.mkdir(parents=True, exist_ok=True)
+    
+    file_name = f"{model_info['name'].lower().replace(' ', '_')}.md"
+    log_file = log_dir / file_name
+    
+    try:
+        with open(log_file, "w", encoding="utf-8") as f:
+            f.write(prompt_text)
+        print(f"📝 PROMPT SAVED TO: {log_file}")
+    except Exception as e:
+        print(f"❌ Failed to save prompt to file: {e}")
 
 # -------------------------------------------------
 if __name__ == "__main__":
