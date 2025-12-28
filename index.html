@@ -228,14 +228,14 @@
 
         <div class="chart-container">
             <div class="chart-header">
-                <h2>Equity Growth Over Time</h2>
-                <label for="performanceFile" class="custom-file-upload">
-                    Load performance.csv
-                </label>
-                <button id="downloadBtn" class="custom-file-upload" style="margin-left: 10px;">
-                    Download as Image
+                <div>
+                    <h2>Equity Growth Over Time</h2>
+                    <p id="lastSync" style="font-size: 0.8rem; color: var(--text-dim); margin-top: 4px;">Syncing data...
+                    </p>
+                </div>
+                <button id="downloadBtn" class="custom-file-upload">
+                    Download for Substack
                 </button>
-                <input type="file" id="performanceFile" accept=".csv" />
             </div>
             <canvas id="performanceChart"></canvas>
         </div>
@@ -258,8 +258,7 @@
 
         const initialCapital = 1000;
 
-        // --- NEW: Auto-fetch performance.csv on load ---
-        window.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function () {
             const csvPath = 'logs/performance.csv';
 
             fetch(csvPath)
@@ -271,32 +270,25 @@
                     Papa.parse(text, {
                         header: true,
                         dynamicTyping: true,
+                        skipEmptyLines: true,
                         complete: function (results) {
                             processData(results.data);
                         }
                     });
                 })
                 .catch(err => {
-                    console.log('Auto-fetch failed. Please load CSV manually.', err);
+                    console.log('Auto-fetch failed.', err);
+                    document.getElementById('lastSync').textContent = 'Error loading data from logs/performance.csv';
                 });
-        });
-
-        document.getElementById('performanceFile').addEventListener('change', function (e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            Papa.parse(file, {
-                header: true,
-                dynamicTyping: true,
-                complete: function (results) {
-                    processData(results.data);
-                }
-            });
         });
 
         function processData(data) {
             // Filter out empty rows
             const cleanData = data.filter(row => row.Date);
+            if (cleanData.length === 0) return;
+
+            const latestRow = cleanData[cleanData.length - 1];
+            document.getElementById('lastSync').textContent = `Last Synced: ${latestRow.Date}`;
 
             const labels = cleanData.map(row => row.Date);
             const models = ['ChatGPT', 'Gemini', 'Claude', 'Perplexity'];
