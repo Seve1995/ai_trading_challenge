@@ -24,16 +24,9 @@
 
 📋 Analyzing Clipboard Strategy...
 
-🔎 Found 3 trade(s) (CSV).
+🔎 Found 2 trade(s) (Markdown table).
 
 🛡️ SYNCING PROTECTION: FBIO (Target Stop: $3.10)
    ⚠️ Conflict: Open SELL order exists for FBIO: LIMIT @ $4.50 (pending_cancel)
    ⚠️ Skipping STOP placement for FBIO because shares are reserved by an open SELL order.
-
-🛡️ SYNCING PROTECTION: TWST (Target Stop: $31.90)
-   ⚠️ Conflict: Open SELL order exists for TWST: LIMIT @ $39.35 (pending_cancel)
-   ⚠️ Skipping STOP placement for TWST because shares are reserved by an open SELL order.
-
-🚀 PROCESSING BUY: UPST
-   ⚠️ Pending Order: There is already an open BUY order for UPST. Skipping duplicates.
 ```

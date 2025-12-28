@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Trading Challenge | Performance Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #0b0e14;
+            --card-bg: #161b22;
+            --accent-primary: #58a6ff;
+            --accent-secondary: #bc8cff;
+            --text-main: #c9d1d9;
+            --text-dim: #8b949e;
+            --glass-bg: rgba(22, 27, 34, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 40px 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        p.subtitle {
+            color: var(--text-dim);
+            font-size: 1.1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 24px;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-primary);
+        }
+
+        .stat-card h3 {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .stat-card .value {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .stat-card .change {
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }
+
+        .change.plus {
+            color: #3fb950;
+        }
+
+        .change.minus {
+            color: #f85149;
+        }
+
+        .chart-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .chart-header h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        #performanceChart {
+            width: 100% !important;
+            height: 450px !important;
+        }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-card,
+        .chart-container {
+            animation: fadeIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .custom-file-upload {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: background 0.2s;
+        }
+
+        .custom-file-upload:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .test-banner {
+            background: #d29922;
+            color: #0b0e14;
+            text-align: center;
+            padding: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="test-banner" id="testBanner">⚠️ TEST MODE: Displaying Simulated Performance Data</div>
+    <div class="container">
+        <header>
+            <h1>AI Trading Challenge</h1>
+            <p class="subtitle">Weekly Performance Comparison & Tracking</p>
+        </header>
+
+        <div class="stats-grid" id="statsGrid">
+            <!-- Stats will be injected here -->
+            <div class="stat-card">
+                <h3>ChatGPT</h3>
+                <div class="value">$----.--</div>
+                <div class="change">--%</div>
+            </div>
+            <div class="stat-card">
+                <h3>Gemini</h3>
+                <div class="value">$----.--</div>
+                <div class="change">--%</div>
+            </div>
+            <div class="stat-card">
+                <h3>Claude</h3>
+                <div class="value">$----.--</div>
+                <div class="change">--%</div>
+            </div>
+            <div class="stat-card">
+                <h3>Perplexity</h3>
+                <div class="value">$----.--</div>
+                <div class="change">--%</div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-header">
+                <h2>Equity Growth Over Time</h2>
+                <label for="performanceFile" class="custom-file-upload">
+                    Load performance.csv
+                </label>
+                <button id="downloadBtn" class="custom-file-upload" style="margin-left: 10px;">
+                    Download as Image
+                </button>
+                <input type="file" id="performanceFile" accept=".csv" />
+            </div>
+            <canvas id="performanceChart"></canvas>
+        </div>
+
+        <footer class="footer">
+            <p>&copy; 2026 Portfolio Experiment. Built for Deep Research AI Analysis.</p>
+        </footer>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+        let chart;
+
+        const colors = {
+            'ChatGPT': '#58a6ff',
+            'Gemini': '#bc8cff',
+            'Claude': '#3fb950',
+            'Perplexity': '#f85149'
+        };
+
+        const initialCapital = 1000;
+
+        // --- NEW: Auto-fetch performance.csv on load ---
+        window.addEventListener('DOMContentLoaded', function () {
+            const csvPath = 'logs/performance.csv';
+
+            fetch(csvPath)
+                .then(response => {
+                    if (!response.ok) throw new Error('File not found');
+                    return response.text();
+                })
+                .then(text => {
+                    Papa.parse(text, {
+                        header: true,
+                        dynamicTyping: true,
+                        complete: function (results) {
+                            processData(results.data);
+                        }
+                    });
+                })
+                .catch(err => {
+                    console.log('Auto-fetch failed. Please load CSV manually.', err);
+                });
+        });
+
+        document.getElementById('performanceFile').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            Papa.parse(file, {
+                header: true,
+                dynamicTyping: true,
+                complete: function (results) {
+                    processData(results.data);
+                }
+            });
+        });
+
+        function processData(data) {
+            // Filter out empty rows
+            const cleanData = data.filter(row => row.Date);
+
+            const labels = cleanData.map(row => row.Date);
+            const models = ['ChatGPT', 'Gemini', 'Claude', 'Perplexity'];
+
+            const datasets = models.map(model => ({
+                label: model,
+                data: cleanData.map(row => row[model]),
+                borderColor: colors[model],
+                backgroundColor: colors[model] + '20',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }));
+
+            renderChart(labels, datasets);
+            updateStats(cleanData[cleanData.length - 1]);
+        }
+
+        function renderChart(labels, datasets) {
+            if (chart) chart.destroy();
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index',
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: {
+                                color: '#8b949e',
+                                callback: value => '$' + value.toLocaleString()
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#8b949e' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: '#c9d1d9',
+                                usePointStyle: true,
+                                padding: 20,
+                                font: { family: 'Outfit', size: 14 }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#161b22',
+                            titleColor: '#fff',
+                            bodyColor: '#c9d1d9',
+                            borderColor: 'rgba(255, 255, 255, 0.1)',
+                            borderWidth: 1,
+                            padding: 12,
+                            boxPadding: 6,
+                            callbacks: {
+                                label: function (context) {
+                                    return context.dataset.label + ': $' + context.parsed.y.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateStats(lastRow) {
+            const grid = document.getElementById('statsGrid');
+            grid.innerHTML = '';
+
+            const models = ['ChatGPT', 'Gemini', 'Claude', 'Perplexity'];
+            models.forEach(model => {
+                const value = lastRow[model] || 0;
+                const changePcnt = ((value - initialCapital) / initialCapital * 100).toFixed(2);
+                const isPlus = changePcnt >= 0;
+
+                const card = document.createElement('div');
+                card.className = 'stat-card';
+                card.innerHTML = `
+                    <h3>${model}</h3>
+                    <div class="value">$${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                    <div class="change ${isPlus ? 'plus' : 'minus'}">
+                        ${isPlus ? '↑' : '↓'} ${Math.abs(changePcnt)}% total return
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        document.getElementById('downloadBtn').addEventListener('click', function () {
+            const link = document.createElement('a');
+            link.download = `AI-Trading-Performance-${new Date().toISOString().split('T')[0]}.png`;
+            link.href = document.getElementById('performanceChart').toDataURL('image/png');
+            link.click();
+        });
+    </script>
+</body>
+
+</html>
