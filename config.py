@@ -1,10 +1,23 @@
 import os
 import alpaca_trade_api as tradeapi
 from dotenv import load_dotenv
+import pathlib
 
 # Load environment variables
 load_dotenv()
 
+# --- Paths ---
+BASE_DIR = pathlib.Path(__file__).parent.resolve()
+LOGS_DIR = BASE_DIR / "logs"
+PERFORMANCE_LOG = LOGS_DIR / "performance.csv"
+MACRO_CACHE_DIR = LOGS_DIR / "macro_cache"
+EXECUTION_LOGS_DIR = LOGS_DIR / "execution"
+
+# --- URLs ---
+# The GitHub Pages URL for the interactive dashboard
+INTERACTIVE_URL = "https://seve1995.github.io/ai-portfolio-experiment/"
+
+# --- Models ---
 MODELS = {
     "1": {"name": "ChatGPT", "env_prefix": "CHATGPT"},
     "2": {"name": "Gemini", "env_prefix": "GEMINI"},
@@ -32,7 +45,6 @@ def get_alpaca_api(model_info):
     
     if not key or not secret:
         # Fallback to default if model-specific keys are not found
-        # This helps with initial transition or if the user wants to use one for all
         key = os.getenv("ALPACA_KEY")
         secret = os.getenv("ALPACA_SECRET")
         

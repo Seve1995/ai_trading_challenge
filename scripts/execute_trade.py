@@ -10,6 +10,11 @@ import alpaca_trade_api as tradeapi
 import pathlib
 from datetime import date
 
+import sys
+import pathlib
+# Add root directory to path to import config
+root_dir = pathlib.Path(__file__).parent.parent.resolve()
+sys.path.append(str(root_dir))
 import config
 
 # 1. Select Model and Get API

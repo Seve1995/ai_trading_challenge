@@ -1,12 +1,16 @@
 import pandas as pd
 from datetime import datetime
+import sys
 import pathlib
+# Add root directory to path to import config
+root_dir = pathlib.Path(__file__).parent.parent.resolve()
+sys.path.append(str(root_dir))
+import config
 
-# Configuration
-PERFORMANCE_LOG = pathlib.Path("logs/performance.csv")
-REPORT_OUTPUT = pathlib.Path("logs/substack_report.md")
-# UPDATE THIS with your GitHub Pages or hosted URL
-INTERACTIVE_URL = "https://your-username.github.io/portfolio-experiment" 
+# Configuration targets
+PERFORMANCE_LOG = config.PERFORMANCE_LOG
+REPORT_OUTPUT = config.LOGS_DIR / "substack_report.md"
+INTERACTIVE_URL = config.INTERACTIVE_URL
 
 def generate_report():
     if not PERFORMANCE_LOG.exists():

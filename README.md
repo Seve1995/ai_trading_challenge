@@ -1,4 +1,4 @@
-# Portfolio Experiment
+# AI Portfolio Experiment
 
 A rules-based algorithmic trading experiment using Python, [Alpaca Trade API](https://alpaca.markets/), and AI-assisted decision making.
 
@@ -11,9 +11,15 @@ This project implements a semi-automated trading workflow:
 
 ## Project Structure
 
-- `generate_prompt.py`: Fetches account and macro data, then generates and copies a PM-style prompt to your clipboard.
-- `execute_trade.py`: Parses AI output from the clipboard (Markdown tables or CSV) and executes trades on Alpaca with safety checks.
-- `check_history.py`: Displays recent account activity, including fills and order status.
+- `config.py`: Centralized configuration, paths, and model selection logic.
+- `scripts/`:
+  - `generate_prompt.py`: Fetches account and macro data, then generates and copies a PM-style prompt to your clipboard.
+  - `execute_trade.py`: Parses AI output from the clipboard (Markdown tables or CSV) and executes trades on Alpaca with safety checks.
+  - `check_history.py`: Displays recent account activity, including fills and order status.
+  - `log_performance.py`: Rebuilds performance history from Alpaca and saves to `logs/performance.csv`.
+  - `generate_substack_report.py`: Generates a Markdown report for Substack based on performance data.
+- `dashboard/`:
+  - `index.html`: Interactive performance dashboard.
 - `requirements.txt`: List of Python dependencies.
 - `.env`: (User-created) Stores sensitive API keys.
 
@@ -41,24 +47,24 @@ This project implements a semi-automated trading workflow:
 ### 1. Generate Prompt
 Run the generator to gather data and prepare the AI prompt:
 ```bash
-python generate_prompt.py
+python scripts/generate_prompt.py
 ```
 *The prompt is automatically copied to your clipboard. Paste it into your preferred AI.*
 
 ### 2. Execute Trades
 After the AI provides an execution table, copy that table to your clipboard and run:
 ```bash
-python execute_trade.py
+python scripts/execute_trade.py
 ```
 To preview trades without executing, use the dry-run flag:
 ```bash
-python execute_trade.py --dry-run
+python scripts/execute_trade.py --dry-run
 ```
 
 ### 3. Check Status
 View your recent trade history and fills:
 ```bash
-python check_history.py
+python scripts/check_history.py
 ```
 
 ## Safety Features

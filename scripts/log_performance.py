@@ -1,11 +1,13 @@
-import os
-import csv
-from datetime import datetime, date
+import sys
 import pathlib
+from datetime import datetime
+# Add root directory to path to import config
+root_dir = pathlib.Path(__file__).parent.parent.resolve()
+sys.path.append(str(root_dir))
 import config
 
 # Configuration
-PERFORMANCE_LOG = pathlib.Path("logs/performance.csv")
+PERFORMANCE_LOG = config.PERFORMANCE_LOG
 EXPERIMENT_START_DATE = "2026-01-02"
 
 def log_all_performance():

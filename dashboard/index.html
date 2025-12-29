@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Trading Challenge | Performance Dashboard</title>
+    <title>AI Portfolio Experiment | Performance Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
@@ -198,7 +198,7 @@
     <div class="test-banner" id="testBanner">⚠️ TEST MODE: Displaying Simulated Performance Data</div>
     <div class="container">
         <header>
-            <h1>AI Trading Challenge</h1>
+            <h1>AI Portfolio Experiment</h1>
             <p class="subtitle">Weekly Performance Comparison & Tracking</p>
         </header>
 
@@ -259,7 +259,7 @@
         const initialCapital = 1000;
 
         document.addEventListener('DOMContentLoaded', function () {
-            const csvPath = 'logs/performance.csv';
+            const csvPath = '../logs/performance.csv';
 
             fetch(csvPath)
                 .then(response => {

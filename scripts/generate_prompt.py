@@ -7,6 +7,11 @@ from datetime import date
 import json
 import pathlib
 
+import sys
+import pathlib
+# Add root directory to path to import config
+root_dir = pathlib.Path(__file__).parent.parent.resolve()
+sys.path.append(str(root_dir))
 import config
 
 # -------------------------------------------------
@@ -15,10 +20,8 @@ import config
 model_info = config.select_model()
 api = config.get_alpaca_api(model_info)
 
-# -------------------------------------------------
 # Macro Data
-# -------------------------------------------------
-MACRO_CACHE_DIR = pathlib.Path("logs/macro_cache")
+MACRO_CACHE_DIR = config.MACRO_CACHE_DIR
 
 def get_macro_data():
     """
