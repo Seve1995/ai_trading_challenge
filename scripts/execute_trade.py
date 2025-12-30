@@ -436,7 +436,14 @@ def execute_trade(trade, dry_run=False):
             account = api.get_account()
             bp = float(account.buying_power)
             est_cost = qty * limit_price
-            log_execution(f"   Order: BUY {qty} {ticker} @ ${limit_price:.2f} (Est. Cost: ${est_cost:.2f})")
+            msg = f"   Order: {action} {qty} {ticker} @ ${limit_price:.2f}"
+            if stop_price or tp_price:
+                sl_str = f"SL: ${stop_price:.2f}" if stop_price else "SL: N/A"
+                tp_str = f"TP: ${tp_price:.2f}" if tp_price else "TP: N/A"
+                msg += f" ({sl_str}, {tp_str})"
+            
+            msg += f" (Est. Cost: ${est_cost:.2f})"
+            log_execution(msg)
 
             if est_cost > bp:
                 log_execution(f"   ⚠️ WARNING: Insufficient Buying Power! (Need ${est_cost:.2f}, Have ${bp:.2f})")
