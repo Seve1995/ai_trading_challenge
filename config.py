@@ -12,7 +12,7 @@ LOGS_DIR = BASE_DIR / "logs"
 PERFORMANCE_LOG = LOGS_DIR / "performance.csv"
 MACRO_CACHE_DIR = LOGS_DIR / "macro_cache"
 EXECUTION_LOGS_DIR = LOGS_DIR / "execution"
-EXPERIMENT_START_DATE = os.getenv("EXPERIMENT_START_DATE", "2025-12-28")
+EXPERIMENT_START_DATE = os.getenv("EXPERIMENT_START_DATE", "2025-12-29")
 
 # --- URLs ---
 # The GitHub Pages URL for the interactive dashboard
