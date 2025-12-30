@@ -10,14 +10,32 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
         :root {
+            /* Dark Mode (Default) */
             --bg-color: #0b0e14;
             --card-bg: #161b22;
             --accent-primary: #58a6ff;
             --accent-secondary: #bc8cff;
             --text-main: #c9d1d9;
+            --text-value: #ffffff;
             --text-dim: #8b949e;
             --glass-bg: rgba(22, 27, 34, 0.7);
             --glass-border: rgba(255, 255, 255, 0.1);
+            --chart-grid: rgba(255, 255, 255, 0.05);
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f0f4f8;
+            --card-bg: #ffffff;
+            --accent-primary: #0969da;
+            --accent-secondary: #8250df;
+            --text-main: #1f2328;
+            --text-value: #1f2328;
+            --text-dim: #656d76;
+            --glass-bg: rgba(255, 255, 255, 0.8);
+            --glass-border: rgba(31, 35, 40, 0.1);
+            --chart-grid: rgba(31, 35, 40, 0.05);
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
         }
 
         * {
@@ -28,21 +46,52 @@
 
         body {
             font-family: 'Outfit', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
             background-color: var(--bg-color);
             color: var(--text-main);
             min-height: 100vh;
             padding: 40px 20px;
             overflow-x: hidden;
+            text-rendering: optimizeLegibility;
         }
 
         .container {
             max-width: 1100px;
             margin: 0 auto;
+            position: relative;
         }
 
         header {
-            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             margin-bottom: 50px;
+            position: relative;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: -10px;
+            right: 0;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 8px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            box-shadow: var(--shadow);
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--card-bg);
+            border-color: var(--accent-primary);
         }
 
         h1 {
@@ -67,13 +116,30 @@
             margin-bottom: 40px;
         }
 
-        .stat-card {
+        .glass-isolation-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background: var(--glass-bg);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
             border: 1px solid var(--glass-border);
             border-radius: 16px;
             padding: 24px;
-            transition: transform 0.3s ease, border-color 0.3s ease;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1), border-color 0.3s ease;
+            z-index: 1;
+            /* Note: NO backdrop-filter here to preserve subpixel antialiasing */
         }
 
         .stat-card:hover {
@@ -82,17 +148,18 @@
         }
 
         .stat-card h3 {
-            font-size: 0.9rem;
+            font-size: 14px;
             color: var(--text-dim);
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 12px;
+            font-weight: 600;
         }
 
         .stat-card .value {
-            font-size: 1.8rem;
+            font-size: 28px;
             font-weight: 600;
-            color: #fff;
+            color: var(--text-value);
         }
 
         .stat-card .change {
@@ -101,20 +168,31 @@
         }
 
         .change.plus {
+            color: #1a7f37;
+        }
+
+        [data-theme="dark"] .change.plus {
             color: #3fb950;
         }
 
         .change.minus {
+            color: #d1242f;
+        }
+
+        [data-theme="dark"] .change.minus {
             color: #f85149;
         }
 
         .chart-container {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
+            background: var(--card-bg);
             border: 1px solid var(--glass-border);
             border-radius: 20px;
             padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            /* Note: NO backdrop-filter here to preserve subpixel antialiasing */
         }
 
         .chart-header {
@@ -132,6 +210,11 @@
         #performanceChart {
             width: 100% !important;
             height: 450px !important;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+            transform: translateZ(0);
+            /* Isolate to sharp layer */
+            backface-visibility: hidden;
         }
 
         .footer {
@@ -159,22 +242,72 @@
             animation: fadeIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
         }
 
-        #fileInput {
-            display: none;
-        }
-
-        .custom-file-upload {
-            background: rgba(255, 255, 255, 0.05);
+        .segmented-control {
+            display: flex;
+            background: var(--card-bg);
+            padding: 4px;
+            border-radius: 10px;
             border: 1px solid var(--glass-border);
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: background 0.2s;
+            gap: 2px;
         }
 
-        .custom-file-upload:hover {
-            background: rgba(255, 255, 255, 0.1);
+        .segment-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-family: inherit;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .segment-btn.active {
+            background: var(--accent-primary);
+            color: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .segment-btn:not(.active):hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+        }
+
+        /* Custom Legend Styling */
+        .custom-legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-main);
+            transition: opacity 0.2s ease;
+        }
+
+        .legend-item:hover {
+            opacity: 0.7;
+        }
+
+        .legend-item.hidden {
+            text-decoration: line-through;
+            opacity: 0.4;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
         }
 
         .test-banner {
@@ -195,9 +328,14 @@
 </head>
 
 <body>
-    <div class="test-banner" id="testBanner">⚠️ TEST MODE: Displaying Simulated Performance Data</div>
+    <div class="test-banner" id="testBanner" style="display: none;">⚠️ TEST MODE: Displaying Simulated Performance Data
+    </div>
     <div class="container">
         <header>
+            <button class="theme-toggle" id="themeToggle">
+                <span id="themeIcon">🌙</span>
+                <span id="themeText">Dark Mode</span>
+            </button>
             <h1>AI Portfolio Experiment</h1>
             <p class="subtitle">Weekly Performance Comparison & Tracking</p>
         </header>
@@ -205,6 +343,7 @@
         <div class="stats-grid" id="statsGrid">
             <!-- Stats will be injected here -->
             <div class="stat-card">
+                <div class="glass-isolation-layer"></div>
                 <h3>ChatGPT</h3>
                 <div class="value">$----.--</div>
                 <div class="change">--%</div>
@@ -227,17 +366,53 @@
         </div>
 
         <div class="chart-container">
+            <div class="glass-isolation-layer"></div>
             <div class="chart-header">
                 <div>
                     <h2>Equity Growth Over Time</h2>
                     <p id="lastSync" style="font-size: 0.8rem; color: var(--text-dim); margin-top: 4px;">Syncing data...
                     </p>
                 </div>
-                <button id="downloadBtn" class="custom-file-upload">
-                    Download for Substack
-                </button>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <div class="segmented-control">
+                        <button class="segment-btn active" data-scale="dynamic"
+                            onclick="setYScale('dynamic')">Dynamic</button>
+                        <button class="segment-btn" data-scale="zero" onclick="setYScale('zero')">From $0</button>
+                    </div>
+                    <button id="downloadBtn" class="custom-file-upload"
+                        style="padding: 8px 16px; border-radius: 8px; background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-main); cursor: pointer; font-size: 0.85rem;">
+                        Download
+                    </button>
+                </div>
             </div>
+            <div id="chartLegend" class="custom-legend"></div>
             <canvas id="performanceChart"></canvas>
+        </div>
+
+        <div class="chart-container" style="margin-top: 40px; padding: 0; overflow: hidden;">
+            <div
+                style="padding: 24px 30px; border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="font-size: 1.3rem; font-weight: 600;">Performance History</h2>
+            </div>
+            <div style="overflow-x: auto;">
+                <table id="historyTable"
+                    style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem;">
+                    <thead>
+                        <tr
+                            style="background: rgba(255,255,255,0.03); color: var(--text-dim); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">
+                            <th style="padding: 16px 30px; border-bottom: 1px solid var(--glass-border);">Date</th>
+                            <th style="padding: 16px 20px; border-bottom: 1px solid var(--glass-border);">ChatGPT</th>
+                            <th style="padding: 16px 20px; border-bottom: 1px solid var(--glass-border);">Gemini</th>
+                            <th style="padding: 16px 20px; border-bottom: 1px solid var(--glass-border);">Claude</th>
+                            <th style="padding: 16px 20px; border-bottom: 1px solid var(--glass-border);">Perplexity
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody">
+                        <!-- History rows will be injected here -->
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <footer class="footer">
@@ -257,6 +432,50 @@
         };
 
         const initialCapital = 1000;
+        let yAxisStartAtZero = false;
+
+        // Theme Handling
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const themeText = document.getElementById('themeText');
+
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            themeIcon.textContent = theme === 'light' ? '☀️' : '🌙';
+            themeText.textContent = theme === 'light' ? 'Light Mode' : 'Dark Mode';
+
+            if (chart) {
+                updateChartTheme();
+            }
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+            setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+        }
+
+        themeToggle.addEventListener('click', toggleTheme);
+
+        // Scale Handling
+        function setYScale(mode) {
+            yAxisStartAtZero = (mode === 'zero');
+
+            // Update UI
+            document.querySelectorAll('.segment-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.scale === mode);
+            });
+
+            if (chart) {
+                chart.options.scales.y.beginAtZero = yAxisStartAtZero;
+                chart.options.scales.y.grace = yAxisStartAtZero ? '0%' : '5%';
+                chart.update();
+            }
+        }
+
+        // Initialize theme
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        setTheme(savedTheme);
 
         document.addEventListener('DOMContentLoaded', function () {
             const csvPath = 'logs/performance.csv';
@@ -283,12 +502,13 @@
         });
 
         function processData(data) {
-            // Filter out empty rows
             const cleanData = data.filter(row => row.Date);
             if (cleanData.length === 0) return;
 
+            const firstDate = cleanData[0].Date;
             const latestRow = cleanData[cleanData.length - 1];
-            document.getElementById('lastSync').textContent = `Last Synced: ${latestRow.Date}`;
+            const dateRange = cleanData.length > 1 ? `${firstDate} to ${latestRow.Date}` : latestRow.Date;
+            document.getElementById('lastSync').textContent = `Reporting Period: ${dateRange}`;
 
             const labels = cleanData.map(row => row.Date);
             const models = ['ChatGPT', 'Gemini', 'Claude', 'Perplexity'];
@@ -305,11 +525,60 @@
             }));
 
             renderChart(labels, datasets);
-            updateStats(cleanData[cleanData.length - 1]);
+            updateStats(latestRow);
+            updateHistoryTable(cleanData);
+        }
+
+        function updateHistoryTable(data) {
+            const body = document.getElementById('historyBody');
+            body.innerHTML = '';
+
+            // Show latest first
+            [...data].reverse().forEach(row => {
+                const tr = document.createElement('tr');
+                tr.style.borderBottom = '1px solid var(--glass-border)';
+
+                tr.innerHTML = `
+                    <td style="padding: 16px 30px; font-weight: 500;">${row.Date}</td>
+                    <td style="padding: 16px 20px;">$${Number(row.ChatGPT || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                    <td style="padding: 16px 20px;">$${Number(row.Gemini || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                    <td style="padding: 16px 20px;">$${Number(row.Claude || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                    <td style="padding: 16px 20px;">$${Number(row.Perplexity || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        function getThemeColors() {
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+            return {
+                text: isLight ? '#656d76' : '#8b949e',
+                grid: isLight ? 'rgba(31, 35, 40, 0.05)' : 'rgba(255, 255, 255, 0.05)',
+                tooltipBg: isLight ? '#ffffff' : '#161b22',
+                tooltipBorder: isLight ? 'rgba(31, 35, 40, 0.1)' : 'rgba(255, 255, 255, 0.1)',
+                tooltipText: isLight ? '#1f2328' : '#c9d1d9'
+            };
+        }
+
+        function updateChartTheme() {
+            const theme = getThemeColors();
+            chart.options.scales.y.grid.color = theme.grid;
+            chart.options.scales.y.ticks.color = theme.text;
+            chart.options.scales.x.ticks.color = theme.text;
+            chart.options.plugins.legend.labels.color = theme.tooltipText;
+            chart.options.plugins.tooltip.backgroundColor = theme.tooltipBg;
+            chart.options.plugins.tooltip.titleColor = theme.tooltipText;
+            chart.options.plugins.tooltip.bodyColor = theme.tooltipText;
+            chart.options.plugins.tooltip.borderColor = theme.tooltipBorder;
+            chart.update();
         }
 
         function renderChart(labels, datasets) {
             if (chart) chart.destroy();
+            const theme = getThemeColors();
+
+            // Force high-resolution oversampling for internal canvas elements
+            Chart.defaults.devicePixelRatio = Math.max(window.devicePixelRatio, 2);
 
             chart = new Chart(ctx, {
                 type: 'line',
@@ -323,32 +592,40 @@
                     },
                     scales: {
                         y: {
-                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            beginAtZero: yAxisStartAtZero,
+                            grace: yAxisStartAtZero ? '0%' : '5%',
+                            grid: { color: theme.grid },
                             ticks: {
-                                color: '#8b949e',
+                                color: theme.text,
+                                font: {
+                                    family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                                    size: 11,
+                                    weight: '500'
+                                },
                                 callback: value => '$' + value.toLocaleString()
                             }
                         },
                         x: {
                             grid: { display: false },
-                            ticks: { color: '#8b949e' }
+                            ticks: {
+                                color: theme.text,
+                                font: {
+                                    family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                                    size: 11,
+                                    weight: '500'
+                                }
+                            }
                         }
                     },
                     plugins: {
                         legend: {
-                            position: 'top',
-                            labels: {
-                                color: '#c9d1d9',
-                                usePointStyle: true,
-                                padding: 20,
-                                font: { family: 'Outfit', size: 14 }
-                            }
+                            display: false // Disable internal legend to use custom HTML
                         },
                         tooltip: {
-                            backgroundColor: '#161b22',
-                            titleColor: '#fff',
-                            bodyColor: '#c9d1d9',
-                            borderColor: 'rgba(255, 255, 255, 0.1)',
+                            backgroundColor: theme.tooltipBg,
+                            titleColor: theme.tooltipText,
+                            bodyColor: theme.tooltipText,
+                            borderColor: theme.tooltipBorder,
                             borderWidth: 1,
                             padding: 12,
                             boxPadding: 6,
@@ -360,6 +637,35 @@
                         }
                     }
                 }
+            });
+
+            generateCustomLegend(chart);
+        }
+
+        function generateCustomLegend(chartInstance) {
+            const legendContainer = document.getElementById('chartLegend');
+            legendContainer.innerHTML = '';
+
+            chartInstance.data.datasets.forEach((dataset, i) => {
+                const item = document.createElement('div');
+                item.className = 'legend-item';
+                item.onclick = () => {
+                    const isVisible = chartInstance.isDatasetVisible(i);
+                    chartInstance.setDatasetVisibility(i, !isVisible);
+                    chartInstance.update();
+                    item.classList.toggle('hidden', isVisible);
+                };
+
+                const colorBox = document.createElement('div');
+                colorBox.className = 'legend-color';
+                colorBox.style.backgroundColor = dataset.borderColor;
+
+                const text = document.createElement('span');
+                text.textContent = dataset.label;
+
+                item.appendChild(colorBox);
+                item.appendChild(text);
+                legendContainer.appendChild(item);
             });
         }
 
@@ -376,6 +682,7 @@
                 const card = document.createElement('div');
                 card.className = 'stat-card';
                 card.innerHTML = `
+                    <div class="glass-isolation-layer"></div>
                     <h3>${model}</h3>
                     <div class="value">$${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
                     <div class="change ${isPlus ? 'plus' : 'minus'}">
