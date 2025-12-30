@@ -127,11 +127,15 @@ def parse_clipboard_trades():
     Always returns a list (possibly empty).
     """
     text = pyperclip.paste().strip()
-    log_execution("📋 Analyzing Clipboard Strategy...\n")
+    log_execution("📋 Parsing Portfolio Recommendation from Clipboard...")
+    log_execution("-" * 20)
+    log_execution("📋 CLIPBOARD CONTENT:")
+    log_execution(text)
+    log_execution("-" * 20 + "\n")
 
     # Quick NO_TRADES detection (text-level)
     if "NO_TRADES" in text.upper() or "NO TRADES" in text.upper():
-        log_execution("🛑 AI Signal: NO TRADES TODAY.")
+        log_execution("🛑 AI Signal: Maintain Current Portfolio (No new trades recommended).")
         return []
 
     lines = [l.strip() for l in text.splitlines() if l.strip()]
@@ -156,7 +160,7 @@ def parse_clipboard_trades():
                 trade = {canonical: row.get(original) for canonical, original in h_map.items()}
                 if trade.get("ACTION") and trade.get("TICKER"):
                     if clean_val(trade.get("ACTION")) == "NO_TRADES":
-                        log_execution("🛑 AI Signal: NO TRADES TODAY (CSV row).")
+                        log_execution("🛑 AI Signal: Maintain Current Portfolio (CSV row signal).")
                         return []
                     trades.append(trade)
 
@@ -192,7 +196,7 @@ def parse_clipboard_trades():
                 trade = {canonical: row.get(original) for canonical, original in h_map.items()}
                 if trade.get("ACTION") and trade.get("TICKER"):
                     if clean_val(trade.get("ACTION")) == "NO_TRADES":
-                        log_execution("🛑 AI Signal: NO TRADES TODAY (table row).")
+                        log_execution("🛑 AI Signal: Maintain Current Portfolio (Table row signal).")
                         return []
                     trades.append(trade)
 
