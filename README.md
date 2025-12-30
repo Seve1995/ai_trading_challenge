@@ -18,8 +18,7 @@ This project implements a semi-automated trading workflow:
   - `check_history.py`: Displays recent account activity, including fills and order status.
   - `log_performance.py`: Rebuilds performance history from Alpaca and saves to `logs/performance.csv`.
   - `generate_substack_report.py`: Generates a Markdown report for Substack based on performance data.
-- `dashboard/`:
-  - `index.html`: Interactive performance dashboard.
+- `index.html`: Interactive performance dashboard (located in the root for GitHub Pages).
 - `requirements.txt`: List of Python dependencies.
 - `.env`: (User-created) Stores sensitive API keys.
 

@@ -1,4 +1,5 @@
 import sys
+import csv
 import pathlib
 from datetime import datetime
 # Add root directory to path to import config
@@ -8,7 +9,7 @@ import config
 
 # Configuration
 PERFORMANCE_LOG = config.PERFORMANCE_LOG
-EXPERIMENT_START_DATE = "2026-01-02"
+EXPERIMENT_START_DATE = config.EXPERIMENT_START_DATE
 
 def log_all_performance():
     """Fetches historical equity for all models and rebuilds the performance CSV."""
@@ -44,8 +45,9 @@ def log_all_performance():
         print("🛑 No performance data found. Check your API keys and connection.")
         return
 
-    # Sort dates and filter (if you only want after start date, uncomment below)
+    # Sort dates and filter
     sorted_dates = sorted(master_data.keys())
+    sorted_dates = [d for d in sorted_dates if d >= EXPERIMENT_START_DATE]
     
     # Define headers based on model names in config
     headers = ["Date"] + [info['name'] for info in config.MODELS.values()]
