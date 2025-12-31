@@ -301,13 +301,31 @@
 
         .legend-item.hidden {
             text-decoration: line-through;
-            opacity: 0.4;
+            opacity: 0.3;
+            filter: grayscale(100%);
         }
 
         .legend-color {
             width: 12px;
             height: 12px;
             border-radius: 50%;
+        }
+
+        /* Table zebra striping and hover */
+        #historyBody tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        [data-theme="light"] #historyBody tr:nth-child(even) {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        #historyBody tr:hover {
+            background: rgba(88, 166, 255, 0.1);
+        }
+
+        [data-theme="light"] #historyBody tr:hover {
+            background: rgba(9, 105, 218, 0.08);
         }
 
         .test-banner {
@@ -381,7 +399,7 @@
                     </div>
                     <button id="downloadBtn" class="custom-file-upload"
                         style="padding: 8px 16px; border-radius: 8px; background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-main); cursor: pointer; font-size: 0.85rem;">
-                        Download
+                        📥 Export PNG
                     </button>
                 </div>
             </div>
@@ -468,7 +486,7 @@
 
             if (chart) {
                 chart.options.scales.y.beginAtZero = yAxisStartAtZero;
-                chart.options.scales.y.grace = yAxisStartAtZero ? '0%' : '5%';
+                chart.options.scales.y.grace = yAxisStartAtZero ? '0%' : '10%';
                 chart.update();
             }
         }
@@ -519,9 +537,11 @@
                 borderColor: colors[model],
                 backgroundColor: colors[model] + '20',
                 fill: true,
-                tension: 0.4,
-                pointRadius: 4,
-                pointHoverRadius: 6
+                tension: 0,
+                pointRadius: 6,
+                pointHoverRadius: 8,
+                pointBorderWidth: 2,
+                pointBackgroundColor: colors[model]
             }));
 
             renderChart(labels, datasets);
@@ -556,7 +576,8 @@
                 grid: isLight ? 'rgba(31, 35, 40, 0.05)' : 'rgba(255, 255, 255, 0.05)',
                 tooltipBg: isLight ? '#ffffff' : '#161b22',
                 tooltipBorder: isLight ? 'rgba(31, 35, 40, 0.1)' : 'rgba(255, 255, 255, 0.1)',
-                tooltipText: isLight ? '#1f2328' : '#c9d1d9'
+                tooltipText: isLight ? '#1f2328' : '#c9d1d9',
+                chartBg: isLight ? '#ffffff' : '#161b22'
             };
         }
 
@@ -570,6 +591,8 @@
             chart.options.plugins.tooltip.titleColor = theme.tooltipText;
             chart.options.plugins.tooltip.bodyColor = theme.tooltipText;
             chart.options.plugins.tooltip.borderColor = theme.tooltipBorder;
+            // Update canvas background
+            chart.config.options.plugins.customCanvasBackground.color = theme.chartBg;
             chart.update();
         }
 
@@ -580,9 +603,23 @@
             // Force high-resolution oversampling for internal canvas elements
             Chart.defaults.devicePixelRatio = Math.max(window.devicePixelRatio, 2);
 
+            // Plugin to draw background color on canvas
+            const customCanvasBackgroundPlugin = {
+                id: 'customCanvasBackground',
+                beforeDraw: (chart, args, options) => {
+                    const { ctx } = chart;
+                    ctx.save();
+                    ctx.globalCompositeOperation = 'destination-over';
+                    ctx.fillStyle = options.color || '#161b22';
+                    ctx.fillRect(0, 0, chart.width, chart.height);
+                    ctx.restore();
+                }
+            };
+
             chart = new Chart(ctx, {
                 type: 'line',
                 data: { labels, datasets },
+                plugins: [customCanvasBackgroundPlugin],
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
@@ -593,7 +630,7 @@
                     scales: {
                         y: {
                             beginAtZero: yAxisStartAtZero,
-                            grace: yAxisStartAtZero ? '0%' : '5%',
+                            grace: yAxisStartAtZero ? '0%' : '10%',
                             grid: { color: theme.grid },
                             ticks: {
                                 color: theme.text,
@@ -634,6 +671,9 @@
                                     return context.dataset.label + ': $' + context.parsed.y.toLocaleString();
                                 }
                             }
+                        },
+                        customCanvasBackground: {
+                            color: theme.chartBg
                         }
                     }
                 }
