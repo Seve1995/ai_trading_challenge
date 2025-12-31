@@ -72,3 +72,7 @@ def log_all_performance():
 if __name__ == "__main__":
     from datetime import timedelta # Need this for date generation
     log_all_performance()
+    
+    # Also log current portfolio holdings
+    from log_portfolios import log_all_portfolios
+    log_all_portfolios()

@@ -210,11 +210,6 @@
         #performanceChart {
             width: 100% !important;
             height: 450px !important;
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: crisp-edges;
-            transform: translateZ(0);
-            /* Isolate to sharp layer */
-            backface-visibility: hidden;
         }
 
         .footer {
@@ -342,6 +337,130 @@
             z-index: 1000;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
         }
+
+        /* Portfolio Holdings Section */
+        .portfolio-section {
+            margin-top: 40px;
+        }
+
+        .portfolio-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .portfolio-header h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .date-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .date-selector select {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .holdings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .holdings-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .holdings-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent-primary);
+        }
+
+        .holdings-card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .holdings-card-header .model-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .holdings-card-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .holdings-card-body {
+            padding: 16px 20px;
+            min-height: 100px;
+        }
+
+        .holding-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .holding-row:last-child {
+            border-bottom: none;
+        }
+
+        .holding-ticker {
+            font-weight: 600;
+            color: var(--text-value);
+        }
+
+        .holding-details {
+            text-align: right;
+            font-size: 0.85rem;
+        }
+
+        .holding-qty {
+            color: var(--text-dim);
+        }
+
+        .holding-pl {
+            font-weight: 500;
+        }
+
+        .holding-pl.positive {
+            color: #3fb950;
+        }
+
+        .holding-pl.negative {
+            color: #f85149;
+        }
+
+        .empty-holdings {
+            color: var(--text-dim);
+            font-style: italic;
+            text-align: center;
+            padding: 20px 0;
+        }
     </style>
 </head>
 
@@ -384,7 +503,6 @@
         </div>
 
         <div class="chart-container">
-            <div class="glass-isolation-layer"></div>
             <div class="chart-header">
                 <div>
                     <h2>Equity Growth Over Time</h2>
@@ -405,6 +523,22 @@
             </div>
             <div id="chartLegend" class="custom-legend"></div>
             <canvas id="performanceChart"></canvas>
+        </div>
+
+        <!-- Portfolio Holdings Section -->
+        <div class="portfolio-section">
+            <div class="portfolio-header">
+                <h2>📊 Portfolio Holdings</h2>
+                <div class="date-selector">
+                    <span style="color: var(--text-dim); font-size: 0.9rem;">📅 View date:</span>
+                    <select id="holdingsDateSelect">
+                        <option value="">Loading...</option>
+                    </select>
+                </div>
+            </div>
+            <div class="holdings-grid" id="holdingsGrid">
+                <!-- Holdings cards will be injected here -->
+            </div>
         </div>
 
         <div class="chart-container" style="margin-top: 40px; padding: 0; overflow: hidden;">
@@ -601,7 +735,8 @@
             const theme = getThemeColors();
 
             // Force high-resolution oversampling for internal canvas elements
-            Chart.defaults.devicePixelRatio = Math.max(window.devicePixelRatio, 2);
+            // Using 3x for crisp rendering on high-DPI displays
+            Chart.defaults.devicePixelRatio = Math.max(window.devicePixelRatio, 3);
 
             // Plugin to draw background color on canvas
             const customCanvasBackgroundPlugin = {
@@ -734,11 +869,176 @@
         }
 
         document.getElementById('downloadBtn').addEventListener('click', function () {
+            // Create a composite canvas with title, legend, and chart
+            const chartCanvas = document.getElementById('performanceChart');
+            const padding = 40;
+            const titleHeight = 60;
+            const legendHeight = 50;
+            const footerHeight = 30;
+
+            const exportCanvas = document.createElement('canvas');
+            exportCanvas.width = chartCanvas.width + (padding * 2);
+            exportCanvas.height = chartCanvas.height + titleHeight + legendHeight + footerHeight + (padding * 2);
+
+            const ctx = exportCanvas.getContext('2d');
+
+            // Background
+            ctx.fillStyle = '#161b22';
+            ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+
+            // Title
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('AI Portfolio Experiment - Performance', exportCanvas.width / 2, padding + 30);
+
+            // Date range
+            const dateRange = document.getElementById('lastSync').textContent;
+            ctx.font = '14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+            ctx.fillStyle = '#8b949e';
+            ctx.fillText(dateRange, exportCanvas.width / 2, padding + 52);
+
+            // Legend
+            const legendY = padding + titleHeight + 25;
+            const legendItems = [
+                { name: 'ChatGPT', color: '#58a6ff' },
+                { name: 'Gemini', color: '#bc8cff' },
+                { name: 'Claude', color: '#3fb950' },
+                { name: 'Perplexity', color: '#f85149' }
+            ];
+
+            const totalLegendWidth = legendItems.length * 100;
+            let legendX = (exportCanvas.width - totalLegendWidth) / 2;
+
+            legendItems.forEach(item => {
+                // Color dot
+                ctx.beginPath();
+                ctx.arc(legendX + 8, legendY, 6, 0, Math.PI * 2);
+                ctx.fillStyle = item.color;
+                ctx.fill();
+
+                // Label
+                ctx.fillStyle = '#c9d1d9';
+                ctx.font = '13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText(item.name, legendX + 20, legendY + 4);
+
+                legendX += 100;
+            });
+
+            // Chart
+            ctx.drawImage(chartCanvas, padding, padding + titleHeight + legendHeight, chartCanvas.width, chartCanvas.height);
+
+            // Footer
+            ctx.fillStyle = '#8b949e';
+            ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Generated on ' + new Date().toLocaleDateString(), exportCanvas.width / 2, exportCanvas.height - 15);
+
+            // Download
             const link = document.createElement('a');
-            link.download = `AI-Trading-Performance-${new Date().toISOString().split('T')[0]}.png`;
-            link.href = document.getElementById('performanceChart').toDataURL('image/png');
+            link.download = `AI-Portfolio-Performance-${new Date().toISOString().split('T')[0]}.png`;
+            link.href = exportCanvas.toDataURL('image/png');
             link.click();
         });
+
+        // Portfolio Holdings
+        let portfolioData = {};
+        const holdingsDateSelect = document.getElementById('holdingsDateSelect');
+        const holdingsGrid = document.getElementById('holdingsGrid');
+        const modelOrder = ['ChatGPT', 'Gemini', 'Claude', 'Perplexity'];
+
+        function loadPortfolios() {
+            fetch('logs/portfolios.json')
+                .then(response => {
+                    if (!response.ok) throw new Error('Portfolio data not found');
+                    return response.json();
+                })
+                .then(data => {
+                    portfolioData = data;
+                    populateDateSelector();
+                })
+                .catch(err => {
+                    console.log('Portfolio fetch failed:', err);
+                    holdingsGrid.innerHTML = '<p class="empty-holdings">No portfolio data available yet. Run log_portfolios.py to generate data.</p>';
+                });
+        }
+
+        function populateDateSelector() {
+            const dates = Object.keys(portfolioData).sort().reverse();
+            holdingsDateSelect.innerHTML = '';
+
+            if (dates.length === 0) {
+                holdingsDateSelect.innerHTML = '<option value="">No data</option>';
+                return;
+            }
+
+            dates.forEach(date => {
+                const option = document.createElement('option');
+                option.value = date;
+                option.textContent = date;
+                holdingsDateSelect.appendChild(option);
+            });
+
+            // Show the latest date by default
+            renderHoldings(dates[0]);
+        }
+
+        holdingsDateSelect.addEventListener('change', function () {
+            renderHoldings(this.value);
+        });
+
+        function renderHoldings(date) {
+            if (!portfolioData[date]) {
+                holdingsGrid.innerHTML = '<p class="empty-holdings">No data for this date.</p>';
+                return;
+            }
+
+            const dayData = portfolioData[date];
+            holdingsGrid.innerHTML = '';
+
+            modelOrder.forEach(model => {
+                const holdings = dayData[model] || [];
+                const card = document.createElement('div');
+                card.className = 'holdings-card';
+
+                let bodyContent = '';
+                if (holdings.length === 0) {
+                    bodyContent = '<p class="empty-holdings">💵 All Cash</p>';
+                } else {
+                    holdings.forEach(h => {
+                        const plClass = h.unrealized_pl_pct >= 0 ? 'positive' : 'negative';
+                        const plSign = h.unrealized_pl_pct >= 0 ? '+' : '';
+                        bodyContent += `
+                            <div class="holding-row">
+                                <div>
+                                    <span class="holding-ticker">${h.ticker}</span>
+                                </div>
+                                <div class="holding-details">
+                                    <div class="holding-qty">${h.qty} shares</div>
+                                    <div class="holding-pl ${plClass}">${plSign}${h.unrealized_pl_pct.toFixed(2)}%</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+
+                card.innerHTML = `
+                    <div class="holdings-card-header">
+                        <div class="model-dot" style="background-color: ${colors[model]}"></div>
+                        <h3>${model}</h3>
+                    </div>
+                    <div class="holdings-card-body">
+                        ${bodyContent}
+                    </div>
+                `;
+
+                holdingsGrid.appendChild(card);
+            });
+        }
+
+        // Load portfolios on page load
+        document.addEventListener('DOMContentLoaded', loadPortfolios);
     </script>
 </body>
 

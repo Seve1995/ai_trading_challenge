@@ -1,0 +1,69 @@
+{
+  "2025-12-31": {
+    "ChatGPT": [
+      {
+        "ticker": "AQST",
+        "qty": 31.0,
+        "avg_cost": 6.448065,
+        "current_price": 6.375,
+        "market_value": 197.625,
+        "unrealized_pl": -2.265,
+        "unrealized_pl_pct": -1.13312321776977
+      }
+    ],
+    "Gemini": [
+      {
+        "ticker": "AQST",
+        "qty": 29.0,
+        "avg_cost": 6.308276,
+        "current_price": 6.375,
+        "market_value": 184.875,
+        "unrealized_pl": 1.935,
+        "unrealized_pl_pct": 1.05772384388324
+      },
+      {
+        "ticker": "UPST",
+        "qty": 2.0,
+        "avg_cost": 47.34,
+        "current_price": 44.282,
+        "market_value": 88.564,
+        "unrealized_pl": -6.116,
+        "unrealized_pl_pct": -6.4596535699197295
+      }
+    ],
+    "Claude": [
+      {
+        "ticker": "AQST",
+        "qty": 33.0,
+        "avg_cost": 6.267576,
+        "current_price": 6.375,
+        "market_value": 210.375,
+        "unrealized_pl": 3.545,
+        "unrealized_pl_pct": 1.7139679930377598
+      }
+    ],
+    "Perplexity": []
+  },
+  "2025-12-29": {
+    "ChatGPT": [],
+    "Gemini": [],
+    "Claude": [],
+    "Perplexity": []
+  },
+  "2025-12-30": {
+    "ChatGPT": [],
+    "Gemini": [
+      {
+        "ticker": "UPST",
+        "qty": 2.0,
+        "avg_cost": 47.34,
+        "current_price": 46.85,
+        "market_value": 93.7,
+        "unrealized_pl": -0.980000000000004,
+        "unrealized_pl_pct": -1.0350654837346893
+      }
+    ],
+    "Claude": [],
+    "Perplexity": []
+  }
+}
