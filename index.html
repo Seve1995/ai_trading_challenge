@@ -728,6 +728,13 @@
             'Perplexity': '#f85149'
         };
 
+        const modelVersions = {
+            'ChatGPT': 'ChatGPT 5.2',
+            'Gemini': 'Gemini 3 Pro',
+            'Claude': 'Claude 4.5 Opus',
+            'Perplexity': 'Perplexity'
+        };
+
         const initialCapital = 1000;
         let yAxisStartAtZero = false;
 
@@ -977,7 +984,7 @@
                 colorBox.style.backgroundColor = dataset.borderColor;
 
                 const text = document.createElement('span');
-                text.textContent = dataset.label;
+                text.textContent = modelVersions[dataset.label] || dataset.label;
 
                 item.appendChild(colorBox);
                 item.appendChild(text);
@@ -1000,6 +1007,7 @@
                 card.innerHTML = `
                     <div class="glass-isolation-layer"></div>
                     <h3>${model}</h3>
+                    <div style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 8px;">${modelVersions[model]}</div>
                     <div class="value">$${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
                     <div class="change ${isPlus ? 'plus' : 'minus'}">
                         ${isPlus ? '↑' : '↓'} ${Math.abs(changePcnt)}% total return
@@ -1042,9 +1050,9 @@
             // Legend
             const legendY = padding + titleHeight + 25;
             const legendItems = [
-                { name: 'ChatGPT', color: '#58a6ff' },
-                { name: 'Gemini', color: '#bc8cff' },
-                { name: 'Claude', color: '#3fb950' },
+                { name: 'ChatGPT 5.2', color: '#58a6ff' },
+                { name: 'Gemini 3 Pro', color: '#bc8cff' },
+                { name: 'Claude 4.5 Opus', color: '#3fb950' },
                 { name: 'Perplexity', color: '#f85149' }
             ];
 
