@@ -1019,36 +1019,40 @@
 
         document.getElementById('downloadBtn').addEventListener('click', function () {
             // Create a composite canvas with title, legend, and chart
+            // The chart is rendered at high DPI, so we need to scale everything to match
             const chartCanvas = document.getElementById('performanceChart');
-            const padding = 40;
-            const titleHeight = 60;
-            const legendHeight = 50;
-            const footerHeight = 30;
+            const dpr = Math.max(window.devicePixelRatio, 3); // Match the chart's DPI
+
+            // Use scaled values for proper sizing in the high-DPI canvas
+            const padding = 60 * dpr;
+            const titleHeight = 100 * dpr;
+            const legendHeight = 80 * dpr;
+            const footerHeight = 50 * dpr;
 
             const exportCanvas = document.createElement('canvas');
             exportCanvas.width = chartCanvas.width + (padding * 2);
             exportCanvas.height = chartCanvas.height + titleHeight + legendHeight + footerHeight + (padding * 2);
 
-            const ctx = exportCanvas.getContext('2d');
+            const exportCtx = exportCanvas.getContext('2d');
 
             // Background
-            ctx.fillStyle = '#161b22';
-            ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+            exportCtx.fillStyle = '#161b22';
+            exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
 
-            // Title
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('AI Portfolio Experiment - Performance', exportCanvas.width / 2, padding + 30);
+            // Title - scale font size with DPI
+            exportCtx.fillStyle = '#ffffff';
+            exportCtx.font = `bold ${32 * dpr}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+            exportCtx.textAlign = 'center';
+            exportCtx.fillText('AI Portfolio Experiment - Performance', exportCanvas.width / 2, padding + (40 * dpr));
 
             // Date range
             const dateRange = document.getElementById('lastSync').textContent;
-            ctx.font = '14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-            ctx.fillStyle = '#8b949e';
-            ctx.fillText(dateRange, exportCanvas.width / 2, padding + 52);
+            exportCtx.font = `${18 * dpr}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+            exportCtx.fillStyle = '#8b949e';
+            exportCtx.fillText(dateRange, exportCanvas.width / 2, padding + (70 * dpr));
 
-            // Legend
-            const legendY = padding + titleHeight + 25;
+            // Legend - properly spaced for high DPI
+            const legendY = padding + titleHeight + (30 * dpr);
             const legendItems = [
                 { name: 'ChatGPT 5.2', color: '#58a6ff' },
                 { name: 'Gemini 3 Pro', color: '#bc8cff' },
@@ -1056,33 +1060,35 @@
                 { name: 'Perplexity', color: '#f85149' }
             ];
 
-            const totalLegendWidth = legendItems.length * 100;
+            const legendSpacing = 180 * dpr; // Wider spacing for legibility
+            const totalLegendWidth = legendItems.length * legendSpacing;
             let legendX = (exportCanvas.width - totalLegendWidth) / 2;
+
+            exportCtx.font = `500 ${16 * dpr}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
 
             legendItems.forEach(item => {
                 // Color dot
-                ctx.beginPath();
-                ctx.arc(legendX + 8, legendY, 6, 0, Math.PI * 2);
-                ctx.fillStyle = item.color;
-                ctx.fill();
+                exportCtx.beginPath();
+                exportCtx.arc(legendX + (10 * dpr), legendY, 8 * dpr, 0, Math.PI * 2);
+                exportCtx.fillStyle = item.color;
+                exportCtx.fill();
 
                 // Label
-                ctx.fillStyle = '#c9d1d9';
-                ctx.font = '13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-                ctx.textAlign = 'left';
-                ctx.fillText(item.name, legendX + 20, legendY + 4);
+                exportCtx.fillStyle = '#c9d1d9';
+                exportCtx.textAlign = 'left';
+                exportCtx.fillText(item.name, legendX + (26 * dpr), legendY + (6 * dpr));
 
-                legendX += 100;
+                legendX += legendSpacing;
             });
 
             // Chart
-            ctx.drawImage(chartCanvas, padding, padding + titleHeight + legendHeight, chartCanvas.width, chartCanvas.height);
+            exportCtx.drawImage(chartCanvas, padding, padding + titleHeight + legendHeight, chartCanvas.width, chartCanvas.height);
 
             // Footer
-            ctx.fillStyle = '#8b949e';
-            ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('Generated on ' + new Date().toLocaleDateString(), exportCanvas.width / 2, exportCanvas.height - 15);
+            exportCtx.fillStyle = '#8b949e';
+            exportCtx.font = `${14 * dpr}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+            exportCtx.textAlign = 'center';
+            exportCtx.fillText('Generated on ' + new Date().toLocaleDateString(), exportCanvas.width / 2, exportCanvas.height - (20 * dpr));
 
             // Download
             const link = document.createElement('a');
