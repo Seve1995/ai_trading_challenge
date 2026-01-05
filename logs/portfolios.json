@@ -1,1 +1,18 @@
-{}
+{
+  "2026-01-05": {
+    "ChatGPT": [
+      {
+        "ticker": "AQST",
+        "qty": 23.0,
+        "avg_cost": 6.45,
+        "current_price": 6.41,
+        "market_value": 147.43,
+        "unrealized_pl": -0.92,
+        "unrealized_pl_pct": -0.62015503875969
+      }
+    ],
+    "Gemini": [],
+    "Claude": [],
+    "Perplexity": []
+  }
+}
