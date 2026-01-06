@@ -21,22 +21,32 @@
         "ticker": "AQST",
         "qty": 23.0,
         "avg_cost": 6.45,
-        "current_price": 6.225,
-        "market_value": 143.175,
-        "unrealized_pl": -5.175,
-        "unrealized_pl_pct": -3.48837209302326
+        "current_price": 6.245,
+        "market_value": 143.635,
+        "unrealized_pl": -4.715,
+        "unrealized_pl_pct": -3.1782945736434103
       }
     ],
-    "Gemini": [],
+    "Gemini": [
+      {
+        "ticker": "SEDG",
+        "qty": 9.0,
+        "avg_cost": 31.38,
+        "current_price": 30.66,
+        "market_value": 275.94,
+        "unrealized_pl": -6.48,
+        "unrealized_pl_pct": -2.29445506692161
+      }
+    ],
     "Claude": [
       {
         "ticker": "AQST",
         "qty": 37.0,
         "avg_cost": 6.25,
-        "current_price": 6.225,
-        "market_value": 230.325,
-        "unrealized_pl": -0.925,
-        "unrealized_pl_pct": -0.4
+        "current_price": 6.245,
+        "market_value": 231.065,
+        "unrealized_pl": -0.185,
+        "unrealized_pl_pct": -0.08
       }
     ],
     "Perplexity": []
