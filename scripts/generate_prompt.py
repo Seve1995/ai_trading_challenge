@@ -75,14 +75,20 @@ def get_macro_data():
     except Exception as e:
         dxy_str = f"DXY: Data Error ({e})"
 
-    # Save to cache
-    try:
-        MACRO_CACHE_DIR.mkdir(parents=True, exist_ok=True)
-        with open(cache_file, "w") as f:
-            json.dump({"tnx": tnx_str, "dxy": dxy_str}, f)
-        print(f"   💾 Macro Data cached for {today_str}")
-    except Exception as e:
-        print(f"⚠️ Cache write error: {e}")
+    # Save to cache ONLY if data is valid (not errors)
+    tnx_valid = "Not enough data" not in tnx_str and "Data Error" not in tnx_str
+    dxy_valid = "Not enough data" not in dxy_str and "Data Error" not in dxy_str
+    
+    if tnx_valid and dxy_valid:
+        try:
+            MACRO_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+            with open(cache_file, "w") as f:
+                json.dump({"tnx": tnx_str, "dxy": dxy_str}, f)
+            print(f"   💾 Macro Data cached for {today_str}")
+        except Exception as e:
+            print(f"⚠️ Cache write error: {e}")
+    else:
+        print(f"   ⚠️ Macro Data NOT cached (errors detected, will retry next run)")
 
     return tnx_str, dxy_str
 

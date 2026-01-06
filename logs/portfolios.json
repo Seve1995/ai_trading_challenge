@@ -14,5 +14,31 @@
     "Gemini": [],
     "Claude": [],
     "Perplexity": []
+  },
+  "2026-01-06": {
+    "ChatGPT": [
+      {
+        "ticker": "AQST",
+        "qty": 23.0,
+        "avg_cost": 6.45,
+        "current_price": 6.225,
+        "market_value": 143.175,
+        "unrealized_pl": -5.175,
+        "unrealized_pl_pct": -3.48837209302326
+      }
+    ],
+    "Gemini": [],
+    "Claude": [
+      {
+        "ticker": "AQST",
+        "qty": 37.0,
+        "avg_cost": 6.25,
+        "current_price": 6.225,
+        "market_value": 230.325,
+        "unrealized_pl": -0.925,
+        "unrealized_pl_pct": -0.4
+      }
+    ],
+    "Perplexity": []
   }
 }
