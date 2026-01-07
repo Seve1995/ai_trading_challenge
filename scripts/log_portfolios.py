@@ -9,7 +9,48 @@ sys.path.append(str(root_dir))
 import config
 
 # Configuration
+import yfinance as yf
+
+# Configuration
 PORTFOLIOS_LOG = config.LOGS_DIR / "portfolios.json"
+MACRO_CACHE_DIR = config.LOGS_DIR / "macro_cache"
+TICKER_METADATA_CACHE = MACRO_CACHE_DIR / "ticker_metadata.json"
+
+def get_ticker_metadata(ticker):
+    """Fetches sector and industry data from yfinance with caching."""
+    # Ensure cache dir exists
+    MACRO_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    
+    cache = {}
+    if TICKER_METADATA_CACHE.exists():
+        try:
+            with open(TICKER_METADATA_CACHE, 'r') as f:
+                cache = json.load(f)
+        except:
+            pass
+            
+    if ticker in cache:
+        return cache[ticker]
+        
+    # Fetch from yfinance
+    try:
+        print(f"      > Fetching metadata for {ticker}...")
+        tk = yf.Ticker(ticker)
+        info = tk.info
+        data = {
+            "sector": info.get('sector', 'Unknown'),
+            "industry": info.get('industry', 'Unknown')
+        }
+        cache[ticker] = data
+        
+        # Save cache
+        with open(TICKER_METADATA_CACHE, 'w') as f:
+            json.dump(cache, f)
+            
+        return data
+    except Exception as e:
+        print(f"      ! Error fetching metadata for {ticker}: {e}")
+        return {"sector": "Unknown", "industry": "Unknown"}
 
 def load_existing_portfolios():
     """Load existing portfolio data from JSON file."""
@@ -39,10 +80,16 @@ def log_all_portfolios():
         
         try:
             api = config.get_alpaca_api(info)
+            
+            # Fetch Account Data (Equity & Cash)
+            account = api.get_account()
+            
+            # Fetch Positions
             positions = api.list_positions()
             
             holdings = []
             for pos in positions:
+                metadata = get_ticker_metadata(pos.symbol)
                 holding = {
                     "ticker": pos.symbol,
                     "qty": float(pos.qty),
@@ -50,20 +97,30 @@ def log_all_portfolios():
                     "current_price": float(pos.current_price),
                     "market_value": float(pos.market_value),
                     "unrealized_pl": float(pos.unrealized_pl),
-                    "unrealized_pl_pct": float(pos.unrealized_plpc) * 100  # Convert to percentage
+                    "unrealized_pl_pct": float(pos.unrealized_plpc) * 100,
+                    "sector": metadata['sector'],
+                    "industry": metadata['industry']
                 }
                 holdings.append(holding)
             
-            today_portfolios[model_name] = holdings
+            # Structure the data with top-level account info
+            today_portfolios[model_name] = {
+                "equity": float(account.equity),
+                "cash": float(account.cash),
+                "buying_power": float(account.buying_power),
+                "positions": holdings
+            }
             
             if holdings:
-                print(f"   ✅ {model_name}: {len(holdings)} position(s)")
+                print(f"   ✅ {model_name}: {len(holdings)} position(s) | Equity: ${float(account.equity):.2f}")
             else:
-                print(f"   ✅ {model_name}: No positions (cash)")
+                print(f"   ✅ {model_name}: All Cash | Equity: ${float(account.equity):.2f}")
                 
         except Exception as e:
             print(f"   ❌ Error fetching {model_name}: {e}")
-            today_portfolios[model_name] = []
+            today_portfolios[model_name] = {
+                "equity": 0, "cash": 0, "buying_power": 0, "positions": []
+            }
     
     # Update the master data with today's snapshot
     all_portfolios[today] = today_portfolios

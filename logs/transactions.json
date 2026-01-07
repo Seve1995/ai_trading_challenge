@@ -1,0 +1,100 @@
+{
+  "ChatGPT": [
+    {
+      "symbol": "RIVN",
+      "side": "sell",
+      "qty": 18.0,
+      "price": 18.73,
+      "timestamp": "2026-01-07T14:58:41.890834+00:00",
+      "type": "stop",
+      "id": "afcb9c52-37ec-4517-b6b3-fd888a5fd47c"
+    },
+    {
+      "symbol": "RIVN",
+      "side": "buy",
+      "qty": 18.0,
+      "price": 18.74,
+      "timestamp": "2026-01-07T14:58:41.507808+00:00",
+      "type": "limit",
+      "id": "8e658c3e-5ef2-4c81-8e51-046530939d89"
+    },
+    {
+      "symbol": "AQST",
+      "side": "buy",
+      "qty": 23.0,
+      "price": 6.45,
+      "timestamp": "2026-01-05T14:33:38.269778+00:00",
+      "type": "limit",
+      "id": "5efb9c63-324d-47ac-89e0-b661eaa70354"
+    }
+  ],
+  "Gemini": [
+    {
+      "symbol": "RIVN",
+      "side": "sell",
+      "qty": 18.0,
+      "price": 18.74,
+      "timestamp": "2026-01-07T15:02:50.504682+00:00",
+      "type": "stop",
+      "id": "63689517-d74b-41cb-bd39-6c1fddc82321"
+    },
+    {
+      "symbol": "RIVN",
+      "side": "buy",
+      "qty": 18.0,
+      "price": 18.74,
+      "timestamp": "2026-01-07T15:02:48.429773+00:00",
+      "type": "limit",
+      "id": "c3fe46cf-7f58-4fa0-a5f0-e5206feb8d63"
+    },
+    {
+      "symbol": "SEDG",
+      "side": "buy",
+      "qty": 9.0,
+      "price": 31.38,
+      "timestamp": "2026-01-06T14:45:51.215940+00:00",
+      "type": "limit",
+      "id": "8277c47a-0c8b-4c78-a53e-cdc8e88c0b26"
+    },
+    {
+      "symbol": "WOLF",
+      "side": "sell",
+      "qty": 7.0,
+      "price": 18.74,
+      "timestamp": "2026-01-06T14:34:14.248146+00:00",
+      "type": "market",
+      "id": "8bba24c8-4bfa-43e1-b410-a99fa05de526"
+    },
+    {
+      "symbol": "WOLF",
+      "side": "buy",
+      "qty": 7.0,
+      "price": 18.93,
+      "timestamp": "2026-01-05T16:59:23.739662+00:00",
+      "type": "limit",
+      "id": "de302077-2db4-46fb-8683-526da863e970"
+    }
+  ],
+  "Claude": [
+    {
+      "symbol": "AQST",
+      "side": "buy",
+      "qty": 37.0,
+      "price": 6.25,
+      "timestamp": "2026-01-06T14:34:54.942758+00:00",
+      "type": "limit",
+      "id": "3e657d28-a212-47f3-8836-90e79bb1020c"
+    }
+  ],
+  "Perplexity": [
+    {
+      "symbol": "APLD",
+      "side": "buy",
+      "qty": 3.0,
+      "price": 28.94,
+      "timestamp": "2026-01-06T17:04:00.610775+00:00",
+      "type": "limit",
+      "id": "d42fc320-d332-433a-850f-3938c92562ee"
+    }
+  ]
+}

@@ -90,3 +90,7 @@ if __name__ == "__main__":
     # Also log current portfolio holdings
     from log_portfolios import log_all_portfolios
     log_all_portfolios()
+
+    # Log historical transactions
+    from log_transactions import log_transactions
+    log_transactions()
