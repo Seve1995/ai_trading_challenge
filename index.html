@@ -4,6 +4,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- SEO & Social Sharing -->
+    <meta name="description"
+        content="Watch 4 AI models compete with $1,000 each in the stock market. Live performance tracking of ChatGPT, Gemini, Claude, and Perplexity.">
+    <meta name="keywords"
+        content="AI investing, ChatGPT trading, Gemini stocks, Claude portfolio, AI vs AI, stock market experiment">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://seve1995.github.io/ai-portfolio-experiment/">
+    <meta property="og:title" content="AI Portfolio Experiment - Which AI Wins?">
+    <meta property="og:description"
+        content="$1,000 to invest. 4 AI models. Who makes the best trades? Watch the live competition.">
+    <meta property="og:image" content="https://seve1995.github.io/ai-portfolio-experiment/og-image.png">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://seve1995.github.io/ai-portfolio-experiment/">
+    <meta name="twitter:title" content="AI Portfolio Experiment - Which AI Wins?">
+    <meta name="twitter:description"
+        content="$1,000 to invest. 4 AI models. Who makes the best trades? Watch the live competition.">
+    <meta name="twitter:image" content="https://seve1995.github.io/ai-portfolio-experiment/og-image.png">
+
     <title>AI Portfolio Experiment | Performance Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -167,11 +190,24 @@
             font-size: 0.9rem;
             transition: color 0.2s ease;
             border-bottom: 1px dashed transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .header-links a:hover {
             color: var(--accent-primary);
             border-bottom-color: var(--accent-primary);
+        }
+
+        .header-links svg {
+            opacity: 0.7;
+            transition: transform 0.2s ease;
+        }
+
+        .header-links a:hover svg {
+            opacity: 1;
+            transform: translateY(-1px);
         }
 
         /* Intro Section */
@@ -593,6 +629,120 @@
             padding: 20px 0;
         }
 
+        /* Leaderboard Rankings */
+        .rank-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .rank-badge.rank-1 {
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+        }
+
+        .rank-badge.rank-2 {
+            background: linear-gradient(135deg, #c0c0c0, #a8a8a8);
+        }
+
+        .rank-badge.rank-3 {
+            background: linear-gradient(135deg, #cd7f32, #b8722d);
+        }
+
+        .rank-badge.rank-4 {
+            background: var(--text-dim);
+            opacity: 0.7;
+        }
+
+        .stat-card.leader {
+            border-color: #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), var(--shadow);
+        }
+
+        .leader-label {
+            font-size: 0.75rem;
+            color: #b8860b;
+            /* Darker gold for better contrast in light mode */
+            margin-top: 8px;
+            font-weight: 600;
+        }
+
+        [data-theme="dark"] .leader-label {
+            color: #ffd700;
+            /* Bright gold for dark mode */
+        }
+
+        /* Twitter Share Button */
+        .share-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: rgba(29, 161, 242, 0.1);
+            color: #1da1f2;
+            border: 1px solid rgba(29, 161, 242, 0.3);
+            border-radius: 20px;
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            margin-top: 15px;
+        }
+
+        .share-btn:hover {
+            background: rgba(29, 161, 242, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Countdown Styled for Footer */
+        .countdown-footer {
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            font-weight: 500;
+        }
+
+        .countdown-value {
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        /* Animated counter styles */
+        .value[data-target] {
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Header actions row */
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* Sparkline container */
+        .sparkline {
+            height: 30px;
+            margin-top: 10px;
+        }
+
+        .sparkline canvas {
+            width: 100% !important;
+            height: 30px !important;
+        }
+
         /* Pulsing market status indicator */
         .market-indicator {
             display: inline-block;
@@ -646,26 +796,68 @@
 </head>
 
 <body>
-    <div class="test-banner" id="testBanner" style="display: none;">⚠️ TEST MODE: Displaying Simulated Performance Data
+    <div class="test-banner" id="testBanner" style="display: none;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;">
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+            <path d="M12 9v4" />
+            <path d="M12 17h.01" />
+        </svg>
+        TEST MODE: Displaying Simulated Performance Data
     </div>
     <div class="container">
         <header>
             <div class="theme-switch" id="themeToggle">
                 <div class="theme-switch-track">
                     <div class="theme-switch-icons">
-                        <span class="icon-moon">🌙</span>
-                        <span class="icon-sun">☀️</span>
+                        <span class="icon-moon">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+                            </svg>
+                        </span>
+                        <span class="icon-sun">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="4" />
+                                <path d="M12 2v2" />
+                                <path d="M12 20v2" />
+                                <path d="m4.93 4.93 1.41 1.41" />
+                                <path d="m17.66 17.66 1.41 1.41" />
+                                <path d="M2 12h2" />
+                                <path d="M20 12h2" />
+                                <path d="m6.34 17.66-1.41 1.41" />
+                                <path d="m19.07 4.93-1.41 1.41" />
+                            </svg>
+                        </span>
                     </div>
                     <div class="theme-switch-thumb"></div>
                 </div>
             </div>
             <h1>AI Portfolio Experiment</h1>
             <p class="subtitle">
-                $1,000 to invest in the stock market. Which AI wins?
+                Comparing four $1,000 investment portfolios managed by AI.
                 <span class="header-links">
-                    <a href="https://aiportfolioexperiment.substack.com/" target="_blank" rel="noopener">📝 Blog</a>
-                    <a href="https://github.com/seve1995/ai-portfolio-experiment" target="_blank" rel="noopener">💻
-                        GitHub</a>
+                    <a href="https://aiportfolioexperiment.substack.com/" target="_blank" rel="noopener">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" />
+                            <path d="M18 14h-8" />
+                            <path d="M15 18h-5" />
+                            <path d="M10 6h8v4h-8V6Z" />
+                        </svg>
+                        Substack Blog
+                    </a>
+                    <a href="https://github.com/seve1995/ai-portfolio-experiment" target="_blank" rel="noopener">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="16 18 22 12 16 6" />
+                            <polyline points="8 6 2 12 8 18" />
+                            <line x1="12" x2="12" y1="2" y2="22" />
+                        </svg>
+                        Source Code
+                    </a>
                 </span>
             </p>
         </header>
@@ -712,8 +904,14 @@
                         <button class="segment-btn" data-scale="zero" onclick="setYScale('zero')">From $0</button>
                     </div>
                     <button id="downloadBtn" class="custom-file-upload"
-                        style="padding: 8px 16px; border-radius: 8px; background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-main); cursor: pointer; font-size: 0.85rem;">
-                        📥 Export PNG
+                        style="padding: 8px 16px; border-radius: 8px; background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-main); cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" x2="12" y1="15" y2="3" />
+                        </svg>
+                        Export PNG
                     </button>
                 </div>
             </div>
@@ -724,9 +922,9 @@
         <!-- Portfolio Holdings Section -->
         <div class="portfolio-section">
             <div class="portfolio-header">
-                <h2>📊 Portfolio Holdings</h2>
+                <h2>Portfolio Holdings</h2>
                 <div class="date-selector">
-                    <span style="color: var(--text-dim); font-size: 0.9rem;">📅 View date:</span>
+                    <span style="color: var(--text-dim); font-size: 0.9rem;">View date:</span>
                     <select id="holdingsDateSelect">
                         <option value="">Loading...</option>
                     </select>
@@ -764,9 +962,19 @@
         </div>
 
         <footer class="footer">
-            <p style="margin-bottom: 8px;">⚠️ <strong>Disclaimer:</strong> This is a research experiment for educational
+            <div id="countdownBanner" class="countdown-footer">
+                Experiment ends in <span class="countdown-value" id="countdownValue">-- days</span>
+            </div>
+            <p style="margin-bottom: 8px;"><strong>Disclaimer:</strong> This is a research experiment for educational
                 purposes only. It is not financial advice. Past performance is not indicative of future results.</p>
-            <p>&copy; 2025 AI Portfolio Experiment. Built for Deep Research AI Analysis.</p>
+            <p>&copy; 2026 AI Portfolio Experiment. Built for Deep Research AI Analysis.</p>
+            <button class="share-btn" onclick="shareOnTwitter()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+                Share This Experiment on X
+            </button>
         </footer>
     </div>
 
@@ -922,7 +1130,7 @@
             const firstDate = cleanData[0].Date;
             const latestRow = cleanData[cleanData.length - 1];
             const dateRange = cleanData.length > 1 ? `${firstDate} to ${latestRow.Date}` : latestRow.Date;
-            document.getElementById('dateRange').textContent = `📅 Reporting Period: ${dateRange}`;
+            document.getElementById('dateRange').textContent = `Reporting Period: ${dateRange}`;
 
             const labels = cleanData.map(row => row.Date);
             const models = ['ChatGPT', 'Gemini', 'Claude', 'Perplexity'];
@@ -1111,25 +1319,126 @@
             grid.innerHTML = '';
 
             const models = ['ChatGPT', 'Gemini', 'Claude', 'Perplexity'];
+
+            // Calculate rankings
+            const rankings = models.map(model => ({
+                model,
+                value: lastRow[model] || 0
+            })).sort((a, b) => b.value - a.value);
+
+            const rankMap = {};
+            rankings.forEach((item, index) => {
+                rankMap[item.model] = index + 1;
+            });
+
+            const rankBadges = ['#1', '#2', '#3', '#4'];
+            const leader = rankings[0];
+            const leadAmount = leader.value - rankings[1].value;
+
+            // Store leader info for Twitter sharing
+            window.leaderInfo = {
+                name: leader.model,
+                value: leader.value,
+                change: ((leader.value - initialCapital) / initialCapital * 100).toFixed(1)
+            };
+
             models.forEach(model => {
                 const value = lastRow[model] || 0;
                 const changePcnt = ((value - initialCapital) / initialCapital * 100).toFixed(2);
                 const isPlus = changePcnt >= 0;
+                const rank = rankMap[model];
+                const isLeader = rank === 1;
 
                 const card = document.createElement('div');
-                card.className = 'stat-card';
+                card.className = 'stat-card' + (isLeader ? ' leader' : '');
+
+                let leaderLabel = '';
+                if (isLeader && leadAmount > 0) {
+                    leaderLabel = `<div class="leader-label">Leads by $${leadAmount.toFixed(2)}</div>`;
+                }
+
                 card.innerHTML = `
                     <div class="glass-isolation-layer"></div>
+                    <span class="rank-badge rank-${rank}">${rankBadges[rank - 1]}</span>
                     <h3>${model}</h3>
                     <div style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 8px;">${modelVersions[model]}</div>
-                    <div class="value">$${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                    <div class="value" data-target="${value}">$${initialCapital.toFixed(2)}</div>
                     <div class="change ${isPlus ? 'plus' : 'minus'}">
-                        ${isPlus ? '↑' : '↓'} ${Math.abs(changePcnt)}% total return
-                    </div>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 2px; vertical-align: middle;">
+                        ${isPlus ? '<polyline points="18 15 12 9 6 15"/>' : '<polyline points="6 9 12 15 18 9"/>'}
+                    </svg>
+                    ${Math.abs(changePcnt)}% total return
+                </div>
+                    ${leaderLabel}
                 `;
                 grid.appendChild(card);
             });
+
+            // Animate counters
+            animateCounters();
         }
+
+        function animateCounters() {
+            const counters = document.querySelectorAll('.value[data-target]');
+            const duration = 1500;
+            const startTime = performance.now();
+
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+
+                // Easing function (ease-out-cubic)
+                const easeProgress = 1 - Math.pow(1 - progress, 3);
+
+                counters.forEach(counter => {
+                    const target = parseFloat(counter.dataset.target);
+                    const current = initialCapital + (target - initialCapital) * easeProgress;
+                    counter.textContent = '$' + current.toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                });
+
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                }
+            }
+
+            requestAnimationFrame(update);
+        }
+
+        // Twitter share function
+        function shareOnTwitter() {
+            const experimentStart = new Date('2026-01-05');
+            const today = new Date();
+            const dayNumber = Math.ceil((today - experimentStart) / (1000 * 60 * 60 * 24));
+
+            const leader = window.leaderInfo || { name: 'AI', change: '0' };
+            const sign = parseFloat(leader.change) >= 0 ? '+' : '';
+
+            const tweetText = `Day ${dayNumber} of the AI Portfolio Experiment: ${leader.name} leads with ${sign}${leader.change}% performance.\n\nWho will win the challenge?\n\nhttps://seve1995.github.io/ai-portfolio-experiment/\n\n#AI #Investing #FinTech`;
+
+            const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
+            window.open(tweetUrl, '_blank', 'width=550,height=420');
+        }
+
+        // Countdown timer
+        function updateCountdown() {
+            const experimentEnd = new Date('2026-03-31'); // March 31st, 2026
+            const now = new Date();
+            const diffMs = experimentEnd - now;
+            const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+            const countdownEl = document.getElementById('countdownValue');
+            if (diffDays > 0) {
+                countdownEl.textContent = `${diffDays} day${diffDays !== 1 ? 's' : ''}`;
+            } else {
+                document.getElementById('countdownBanner').innerHTML = '<span class="countdown-value">Experiment Complete</span> • See final results below';
+            }
+        }
+
+        // Initialize countdown on load
+        document.addEventListener('DOMContentLoaded', updateCountdown);
 
         document.getElementById('downloadBtn').addEventListener('click', function () {
             // Create a composite canvas with title, legend, and chart
@@ -1273,7 +1582,7 @@
 
                 let bodyContent = '';
                 if (holdings.length === 0) {
-                    bodyContent = '<p class="empty-holdings">💵 All Cash</p>';
+                    bodyContent = '<p class="empty-holdings">All Cash</p>';
                 } else {
                     holdings.forEach(h => {
                         const plClass = h.unrealized_pl_pct >= 0 ? 'positive' : 'negative';
