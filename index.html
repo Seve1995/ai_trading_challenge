@@ -781,6 +781,17 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             const csvPath = 'logs/performance.csv';
+            const lastUpdatedPath = 'logs/last_updated.json';
+
+            // Fetch last updated timestamp
+            fetch(lastUpdatedPath)
+                .then(response => response.ok ? response.json() : null)
+                .then(data => {
+                    if (data && data.timestamp) {
+                        updateLastSyncDisplay(data.timestamp);
+                    }
+                })
+                .catch(() => console.log('No last_updated.json found'));
 
             fetch(csvPath)
                 .then(response => {
@@ -802,6 +813,56 @@
                     document.getElementById('lastSync').textContent = 'Error loading data from logs/performance.csv';
                 });
         });
+
+        function updateLastSyncDisplay(isoTimestamp) {
+            const syncTime = new Date(isoTimestamp);
+            const now = new Date();
+            const diffMs = now - syncTime;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMins / 60);
+
+            let timeAgo;
+            if (diffMins < 1) {
+                timeAgo = 'just now';
+            } else if (diffMins < 60) {
+                timeAgo = `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
+            } else if (diffHours < 24) {
+                timeAgo = `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+            } else {
+                timeAgo = syncTime.toLocaleDateString();
+            }
+
+            // Check if market is currently open (Mon-Fri, 9:30 AM - 4:00 PM ET)
+            const marketStatus = getMarketStatus();
+            const statusIcon = marketStatus.isOpen ? '🟢' : '🔴';
+            const statusText = marketStatus.isOpen ? 'Market Open' : 'Market Closed';
+
+            document.getElementById('lastSync').innerHTML =
+                `${statusIcon} ${statusText} · Last updated: ${timeAgo}`;
+        }
+
+        function getMarketStatus() {
+            const now = new Date();
+            const etOffset = -5; // EST (adjust for DST if needed)
+            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+            const etTime = new Date(utc + (3600000 * etOffset));
+
+            const day = etTime.getDay();
+            const hours = etTime.getHours();
+            const minutes = etTime.getMinutes();
+            const timeInMinutes = hours * 60 + minutes;
+
+            // Market hours: Mon-Fri, 9:30 AM - 4:00 PM ET
+            const marketOpen = 9 * 60 + 30;  // 9:30 AM
+            const marketClose = 16 * 60;      // 4:00 PM
+
+            const isWeekday = day >= 1 && day <= 5;
+            const isDuringHours = timeInMinutes >= marketOpen && timeInMinutes < marketClose;
+
+            return {
+                isOpen: isWeekday && isDuringHours
+            };
+        }
 
         function processData(data) {
             const cleanData = data.filter(row => row.Date);

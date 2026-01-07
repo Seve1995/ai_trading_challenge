@@ -1,7 +1,9 @@
 import sys
 import csv
+import json
 import pathlib
-from datetime import datetime
+import os
+from datetime import datetime, timezone
 # Add root directory to path to import config
 root_dir = pathlib.Path(__file__).parent.parent.resolve()
 sys.path.append(str(root_dir))
@@ -9,6 +11,7 @@ import config
 
 # Configuration
 PERFORMANCE_LOG = config.PERFORMANCE_LOG
+LAST_UPDATED_LOG = config.LOGS_DIR / "last_updated.json"
 EXPERIMENT_START_DATE = config.EXPERIMENT_START_DATE
 
 def log_all_performance():
@@ -66,6 +69,17 @@ def log_all_performance():
                 writer.writerow(row)
                 
         print(f"\n📂 Performance history rebuilt and saved to: {PERFORMANCE_LOG}")
+        
+        # 5. Write last_updated.json for dashboard
+        source = "github_actions" if os.getenv("GITHUB_ACTIONS") else "local"
+        last_updated = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "source": source
+        }
+        with open(LAST_UPDATED_LOG, "w") as f:
+            json.dump(last_updated, f, indent=2)
+        print(f"📅 Last updated timestamp saved to: {LAST_UPDATED_LOG}")
+        
     except Exception as e:
         print(f"\n❌ Failed to save performance data: {e}")
 
