@@ -14,6 +14,10 @@ jobs:
   refresh-data:
     runs-on: ubuntu-latest
     
+    # Grant write permissions for pushing commits
+    permissions:
+      contents: write
+    
     # Only run if it's actually a trading day (skip holidays, etc. - handled by Alpaca returning same data)
     steps:
       - name: Checkout repository
