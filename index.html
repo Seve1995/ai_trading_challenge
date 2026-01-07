@@ -592,6 +592,56 @@
             text-align: center;
             padding: 20px 0;
         }
+
+        /* Pulsing market status indicator */
+        .market-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+
+        .market-indicator.open {
+            background: #3fb950;
+            box-shadow: 0 0 0 0 rgba(63, 185, 80, 0.7);
+            animation: pulse-green 2s infinite;
+        }
+
+        .market-indicator.closed {
+            background: #f85149;
+            box-shadow: 0 0 0 0 rgba(248, 81, 73, 0.7);
+            animation: pulse-red 2s infinite;
+        }
+
+        @keyframes pulse-green {
+            0% {
+                box-shadow: 0 0 0 0 rgba(63, 185, 80, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 8px rgba(63, 185, 80, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(63, 185, 80, 0);
+            }
+        }
+
+        @keyframes pulse-red {
+            0% {
+                box-shadow: 0 0 0 0 rgba(248, 81, 73, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 8px rgba(248, 81, 73, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(248, 81, 73, 0);
+            }
+        }
     </style>
 </head>
 
@@ -835,11 +885,11 @@
 
             // Check if market is currently open (Mon-Fri, 9:30 AM - 4:00 PM ET)
             const marketStatus = getMarketStatus();
-            const statusIcon = marketStatus.isOpen ? '🟢' : '🔴';
+            const indicatorClass = marketStatus.isOpen ? 'open' : 'closed';
             const statusText = marketStatus.isOpen ? 'Market Open' : 'Market Closed';
 
             document.getElementById('lastSync').innerHTML =
-                `${statusIcon} ${statusText} · Last updated: ${timeAgo}`;
+                `<span class="market-indicator ${indicatorClass}"></span>${statusText} · Last updated: ${timeAgo}`;
         }
 
         function getMarketStatus() {
