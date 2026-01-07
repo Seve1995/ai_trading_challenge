@@ -50,5 +50,51 @@
       }
     ],
     "Perplexity": []
+  },
+  "2026-01-07": {
+    "ChatGPT": [
+      {
+        "ticker": "AQST",
+        "qty": 23.0,
+        "avg_cost": 6.45,
+        "current_price": 6.1698,
+        "market_value": 141.9054,
+        "unrealized_pl": -6.4446,
+        "unrealized_pl_pct": -4.34418604651163
+      }
+    ],
+    "Gemini": [
+      {
+        "ticker": "SEDG",
+        "qty": 9.0,
+        "avg_cost": 31.38,
+        "current_price": 30.61,
+        "market_value": 275.49,
+        "unrealized_pl": -6.93,
+        "unrealized_pl_pct": -2.4537922243467203
+      }
+    ],
+    "Claude": [
+      {
+        "ticker": "AQST",
+        "qty": 37.0,
+        "avg_cost": 6.25,
+        "current_price": 6.1699,
+        "market_value": 228.2863,
+        "unrealized_pl": -2.9637,
+        "unrealized_pl_pct": -1.2815999999999999
+      }
+    ],
+    "Perplexity": [
+      {
+        "ticker": "APLD",
+        "qty": 3.0,
+        "avg_cost": 28.94,
+        "current_price": 30.81,
+        "market_value": 92.43,
+        "unrealized_pl": 5.61,
+        "unrealized_pl_pct": 6.46164478230822
+      }
+    ]
   }
 }
