@@ -653,6 +653,7 @@
                     <h2>Equity Growth Over Time</h2>
                     <p id="lastSync" style="font-size: 0.8rem; color: var(--text-dim); margin-top: 4px;">Syncing data...
                     </p>
+                    <p id="dateRange" style="font-size: 0.75rem; color: var(--text-dim); margin-top: 2px;"></p>
                 </div>
                 <div style="display: flex; gap: 15px; align-items: center;">
                     <div class="segmented-control">
@@ -871,7 +872,7 @@
             const firstDate = cleanData[0].Date;
             const latestRow = cleanData[cleanData.length - 1];
             const dateRange = cleanData.length > 1 ? `${firstDate} to ${latestRow.Date}` : latestRow.Date;
-            document.getElementById('lastSync').textContent = `Reporting Period: ${dateRange}`;
+            document.getElementById('dateRange').textContent = `📅 Reporting Period: ${dateRange}`;
 
             const labels = cleanData.map(row => row.Date);
             const models = ['ChatGPT', 'Gemini', 'Claude', 'Perplexity'];
