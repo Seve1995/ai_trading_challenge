@@ -57,7 +57,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
           # Add the data files
-          git add logs/performance.csv logs/portfolios.json logs/last_updated.json logs/transactions.json logs/macro_cache/
+          git add logs/performance.csv logs/portfolios.json logs/last_updated.json logs/transactions.json
           
           # Only commit if there are changes
           if git diff --staged --quiet; then
