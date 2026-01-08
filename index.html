@@ -2040,7 +2040,7 @@
                 card.style.animationDelay = `${models.indexOf(model) * 0.1}s`;
 
                 card.innerHTML = `
-                    <div class="rank-badge rank-${rank}">${rank === 1 ? '👑' : rank}</div>
+                    <div class="rank-badge rank-${rank}">${rank === 1 ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-3-4 3-6-7z"/><path d="M5 21h14"/></svg>' : rank}</div>
                     <div class="model-name" style="color: ${colors[model]}; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">
                         ${modelVersions[model]}
                     </div>
