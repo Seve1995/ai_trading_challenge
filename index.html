@@ -2040,7 +2040,7 @@
                 card.style.animationDelay = `${models.indexOf(model) * 0.1}s`;
 
                 card.innerHTML = `
-                    <div class="rank-badge rank-${rank}">${rank}</div>
+                    <div class="rank-badge rank-${rank}">${rank === 1 ? '👑' : rank}</div>
                     <div class="model-name" style="color: ${colors[model]}; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">
                         ${modelVersions[model]}
                     </div>
@@ -2048,7 +2048,7 @@
                     <div class="change ${isPositive ? 'plus' : 'minus'}">
                         ${isPositive ? '▲' : '▼'} ${Math.abs(change)}%
                     </div>
-                    ${isLeader ? '<div class="leader-label">🏆 PERFORMANCE LEADER</div>' : ''}
+
                 `;
                 grid.appendChild(card);
             });
