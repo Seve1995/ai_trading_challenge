@@ -30,6 +30,15 @@
   ],
   "Gemini": [
     {
+      "symbol": "SEDG",
+      "side": "sell",
+      "qty": 9.0,
+      "price": 31.42,
+      "timestamp": "2026-01-08T16:34:54.277257+00:00",
+      "type": "market",
+      "id": "ee3cb4ea-35b5-43e4-ad28-bca5bf76c7dc"
+    },
+    {
       "symbol": "RIVN",
       "side": "sell",
       "qty": 18.0,
