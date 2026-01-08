@@ -3,7 +3,7 @@ import csv
 import json
 import pathlib
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 # Add root directory to path to import config
 root_dir = pathlib.Path(__file__).parent.parent.resolve()
 sys.path.append(str(root_dir))
@@ -84,7 +84,6 @@ def log_all_performance():
         print(f"\n❌ Failed to save performance data: {e}")
 
 if __name__ == "__main__":
-    from datetime import timedelta # Need this for date generation
     log_all_performance()
     
     # Also log current portfolio holdings
