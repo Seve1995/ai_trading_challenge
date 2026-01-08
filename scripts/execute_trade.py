@@ -84,7 +84,11 @@ def print_preflight_status():
     try:
         account = api.get_account()
         positions = api.list_positions()
-        orders = api.list_orders(status="open")
+        # Fetch ALL orders to include 'held' (bracket OCO legs)
+        all_orders = api.list_orders(status="all", limit=50)
+        # Filter for active orders (new, accepted, partially_filled, held)
+        active_statuses = {"new", "accepted", "partially_filled", "pending_new", "held"}
+        orders = [o for o in all_orders if o.status in active_statuses]
 
         log_execution(f"💰 Equity: ${float(account.equity):,.2f}")
         log_execution(f"💸 Buying Power: ${float(account.buying_power):,.2f}")
@@ -110,7 +114,9 @@ def print_preflight_status():
                     if o.limit_price
                     else (f"Stop @ ${float(o.stop_price):,.2f}" if o.stop_price else "MARKET")
                 )
-                log_execution(f"   • {o.symbol}: {type_str} {o.qty} shares {price_str} ({o.status})")
+                # Show status with special label for 'held' (OCO leg)
+                status_label = "OCO-held" if o.status == "held" else o.status
+                log_execution(f"   • {o.symbol}: {type_str} {o.qty} shares {price_str} ({status_label})")
 
         log_execution("\n" + "=" * 50 + "\n")
     except Exception as e:
@@ -239,40 +245,44 @@ def manage_hold_protection(ticker, stop_loss_price, dry_run=False):
 
     log_execution(f"\n🛡️ SYNCING PROTECTION: {ticker} (Target Stop: ${stop_loss_price:.2f})")
 
-    open_orders = api.list_orders(status="open", symbols=[ticker])
+    # Fetch ALL orders to find 'held' stop orders (part of brackets)
+    all_orders = api.list_orders(status="all", symbols=[ticker])
+    active_statuses = {"new", "accepted", "partially_filled", "pending_new", "held"}
+    open_orders = [o for o in all_orders if o.status in active_statuses]
 
-    # Any non-stop SELL orders will reserve shares (e.g., limit sell take-profit)
+    # Manage existing STOP sell orders (including 'held' ones from brackets)
+    stop_orders = [o for o in open_orders if o.side == "sell" and o.type == "stop"]
+    
+    # Any non-stop SELL orders that are NOT part of a bracket will reserve shares exclusively
+    # (If they ARE part of a bracket, they share the reservation with the stop leg in OCO)
     conflicting_sell_orders = [
         o for o in open_orders
-        if o.side == "sell" and o.type != "stop"
+        if o.side == "sell" and o.type != "stop" and o.order_class != "bracket"
     ]
+
     if conflicting_sell_orders:
-        # Don’t try to place a stop—Alpaca will reject due to reserved qty.
         for o in conflicting_sell_orders:
             price_str = (
                 f"@ ${float(o.limit_price):.2f}" if o.limit_price
                 else (f"Stop @ ${float(o.stop_price):.2f}" if o.stop_price else "MARKET")
             )
-            log_execution(f"   ⚠️ Conflict: Open SELL order exists for {ticker}: {o.type.upper()} {price_str} ({o.status})")
-        log_execution(f"   ⚠️ Skipping STOP placement for {ticker} because shares are reserved by an open SELL order.")
+            log_execution(f"   ⚠️ Conflict: Open standalone SELL order exists for {ticker}: {o.type.upper()} {price_str} ({o.status})")
+        log_execution(f"   ⚠️ Skipping STOP placement for {ticker} because shares are reserved by a standalone SELL order.")
         return
-
-    # Manage existing STOP sell orders
-    stop_orders = [o for o in open_orders if o.type == "stop" and o.side == "sell"]
 
     if stop_orders:
         for order in stop_orders:
             current_stop = float(order.stop_price)
-            # If a replace is already pending, don't spam more actions
             if order.status and "PENDING" in order.status.upper():
-                log_execution(f"   ⏳ Stop order update already pending for {ticker} ({order.status}). Skipping for now.")
+                log_execution(f"   ⏳ Stop order update already pending for {ticker} ({order.status}). Skipping.")
                 return
 
             if abs(current_stop - stop_loss_price) < 0.01:
-                log_execution(f"   ✅ Already Protected: Existing stop for {ticker} matches ${current_stop:.2f}")
+                status_label = "OCO-held" if order.status == "held" else order.status
+                log_execution(f"   ✅ Already Protected: Existing stop for {ticker} matches ${current_stop:.2f} ({status_label})")
                 return
 
-            log_execution(f"   🔄 Updating: Found stop @ ${current_stop:.2f}. Replacing with ${stop_loss_price:.2f}")
+            log_execution(f"   🔄 Updating: Found stop @ ${current_stop:.2f} ({order.status}). Replacing with ${stop_loss_price:.2f}")
             if dry_run:
                 log_execution(f"   [DRY RUN] Would replace stop-loss for {ticker} to ${stop_loss_price:.2f}")
                 return
