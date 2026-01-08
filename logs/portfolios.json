@@ -127,7 +127,7 @@
   },
   "2026-01-08": {
     "ChatGPT": {
-      "equity": 995.54,
+      "equity": 994.09,
       "cash": 851.44,
       "buying_power": 678.82,
       "positions": [
@@ -135,10 +135,10 @@
           "ticker": "AQST",
           "qty": 23.0,
           "avg_cost": 6.45,
-          "current_price": 6.265,
-          "market_value": 144.095,
-          "unrealized_pl": -4.255,
-          "unrealized_pl_pct": -2.86821705426357,
+          "current_price": 6.202,
+          "market_value": 142.646,
+          "unrealized_pl": -5.704,
+          "unrealized_pl_pct": -3.84496124031008,
           "sector": "Healthcare",
           "industry": "Drug Manufacturers - Specialty & Generic"
         }
@@ -151,7 +151,7 @@
       "positions": []
     },
     "Claude": {
-      "equity": 1000.55,
+      "equity": 998.21,
       "cash": 768.74,
       "buying_power": 768.74,
       "positions": [
@@ -159,17 +159,17 @@
           "ticker": "AQST",
           "qty": 37.0,
           "avg_cost": 6.25,
-          "current_price": 6.265,
-          "market_value": 231.805,
-          "unrealized_pl": 0.555,
-          "unrealized_pl_pct": 0.24,
+          "current_price": 6.202,
+          "market_value": 229.474,
+          "unrealized_pl": -1.776,
+          "unrealized_pl_pct": -0.768,
           "sector": "Healthcare",
           "industry": "Drug Manufacturers - Specialty & Generic"
         }
       ]
     },
     "Perplexity": {
-      "equity": 1016.56,
+      "equity": 1012.53,
       "cash": 913.17,
       "buying_power": 913.17,
       "positions": [
@@ -177,10 +177,10 @@
           "ticker": "APLD",
           "qty": 3.0,
           "avg_cost": 28.94,
-          "current_price": 34.4558,
-          "market_value": 103.3674,
-          "unrealized_pl": 16.5474,
-          "unrealized_pl_pct": 19.05943331029717,
+          "current_price": 33.1149,
+          "market_value": 99.3447,
+          "unrealized_pl": 12.5247,
+          "unrealized_pl_pct": 14.42605390463027,
           "sector": "Technology",
           "industry": "Information Technology Services"
         }
