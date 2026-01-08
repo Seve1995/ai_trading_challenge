@@ -48,6 +48,9 @@ jobs:
           EXPERIMENT_START_DATE=2026-01-05
           EOF
       
+      - name: Run portfolio logging script
+        run: python scripts/log_portfolios.py
+      
       - name: Run performance logging script
         run: python scripts/log_performance.py
       
