@@ -48,6 +48,15 @@ def log_all_performance():
                 # (Paper accounts sometimes return 0 for non-active days)
                 if dt_str in master_data and eq and eq > 0:
                     master_data[dt_str][model_name] = eq
+            
+            # --- Live Patch ---
+            # Historical data can lag. Fetch live equity for "today" to ensure absolute accuracy.
+            today_str = datetime.now().strftime('%Y-%m-%d')
+            if today_str in master_data:
+                account = api.get_account()
+                live_equity = float(account.equity)
+                master_data[today_str][model_name] = live_equity
+                print(f"   ✨ {model_name} live equity patched: ${live_equity:.2f}")
                 
             print(f"   ✅ {model_name} synced.")
         except Exception as e:

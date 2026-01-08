@@ -369,14 +369,18 @@
             margin-bottom: 25px;
         }
 
-        .chart-header h2 {
-            font-size: 1.3rem;
-            font-weight: 600;
+        .chart-wrapper {
+            position: relative;
+            height: 480px;
+            /* Stable height for the chart */
+            width: 100%;
+            margin-top: 10px;
         }
 
         #performanceChart {
             width: 100% !important;
-            height: 450px !important;
+            height: 100% !important;
+            display: block;
         }
 
         .footer {
@@ -1234,7 +1238,9 @@
                 </div>
             </div>
             <div id="chartLegend" class="custom-legend"></div>
-            <canvas id="performanceChart"></canvas>
+            <div class="chart-wrapper">
+                <canvas id="performanceChart"></canvas>
+            </div>
         </div>
 
         <!-- Activity Feed -->
@@ -1461,18 +1467,29 @@
             const labels = cleanData.map(row => row.Date);
             const models = ['ChatGPT', 'Gemini', 'Claude', 'Perplexity'];
 
-            const datasets = models.map(model => ({
-                label: model,
-                data: cleanData.map(row => row[model]),
-                borderColor: colors[model],
-                backgroundColor: colors[model] + '20',
-                fill: true,
-                tension: 0,
-                pointRadius: 6,
-                pointHoverRadius: 8,
-                pointBorderWidth: 2,
-                pointBackgroundColor: colors[model]
-            }));
+            const datasets = models.map(model => {
+                // Create a beautiful gradient for the area fill
+                const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+                gradient.addColorStop(0, colors[model] + '44'); // Subtle 25% opacity
+                gradient.addColorStop(1, colors[model] + '00'); // Fades to transparent
+
+                return {
+                    label: model,
+                    data: cleanData.map(row => row[model]),
+                    borderColor: colors[model],
+                    backgroundColor: gradient,
+                    fill: true,
+                    cubicInterpolationMode: 'monotone',
+                    tension: 0.4,
+                    pointRadius: 0, // Hidden by default
+                    pointHoverRadius: 6,
+                    pointHitRadius: 20,
+                    pointHoverBackgroundColor: colors[model],
+                    pointHoverBorderColor: '#ffffff',
+                    pointHoverBorderWidth: 2,
+                    borderWidth: 3
+                };
+            });
 
             renderChart(labels, datasets);
             updateStats(latestRow);
@@ -1530,11 +1547,52 @@
             if (chart) chart.destroy();
             const theme = getThemeColors();
 
-            // Force high-resolution oversampling for internal canvas elements
-            // Using 3x for crisp rendering on high-DPI displays
-            Chart.defaults.devicePixelRatio = Math.max(window.devicePixelRatio, 3);
+            // High-Resolution Sampling for Ultra-Crisp Rendering
+            const dpr = window.devicePixelRatio || 2;
+            Chart.defaults.devicePixelRatio = Math.min(dpr * 1.5, 4); // Boost resolution for canvas internal elements
 
-            // Plugin to draw background color on canvas
+            // Plugin for Vertical Crosshair & Interactive Effects
+            const crosshairPlugin = {
+                id: 'crosshair',
+                afterDraw: (chart) => {
+                    if (chart.tooltip?._active?.length) {
+                        const { ctx } = chart;
+                        const { x } = chart.tooltip._active[0].element;
+                        const topY = chart.scales.y.top;
+                        const bottomY = chart.scales.y.bottom;
+
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.moveTo(x, topY);
+                        ctx.lineTo(x, bottomY);
+                        ctx.lineWidth = 1;
+                        ctx.strokeStyle = document.documentElement.getAttribute('data-theme') === 'light'
+                            ? 'rgba(0, 0, 0, 0.15)'
+                            : 'rgba(255, 255, 255, 0.15)';
+                        ctx.setLineDash([6, 4]);
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+                }
+            };
+
+            // Plugin for Line Glow and Shadow (The "2026 Look")
+            const glowPlugin = {
+                id: 'glow',
+                beforeDatasetDraw: (chart, args) => {
+                    const { ctx } = chart;
+                    ctx.save();
+                    ctx.shadowBlur = 12;
+                    ctx.shadowColor = args.meta.dataset.options.borderColor;
+                    ctx.shadowOffsetX = 0;
+                    ctx.shadowOffsetY = 4;
+                },
+                afterDatasetDraw: (chart) => {
+                    chart.ctx.restore();
+                }
+            };
+
+            // Custom Background Plugin (existing)
             const customCanvasBackgroundPlugin = {
                 id: 'customCanvasBackground',
                 beforeDraw: (chart, args, options) => {
@@ -1550,25 +1608,38 @@
             chart = new Chart(ctx, {
                 type: 'line',
                 data: { labels, datasets },
-                plugins: [customCanvasBackgroundPlugin],
+                plugins: [customCanvasBackgroundPlugin, crosshairPlugin, glowPlugin],
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    devicePixelRatio: Math.min(window.devicePixelRatio * 2, 4), // Super-sampling
                     interaction: {
                         intersect: false,
                         mode: 'index',
                     },
+                    layout: {
+                        padding: {
+                            top: 20,
+                            bottom: 10,
+                            left: 10,
+                            right: 25
+                        }
+                    },
                     scales: {
                         y: {
                             beginAtZero: yAxisStartAtZero,
-                            grace: yAxisStartAtZero ? '0%' : '10%',
-                            grid: { color: theme.grid },
+                            grace: yAxisStartAtZero ? '0%' : '12%',
+                            grid: {
+                                color: theme.grid,
+                                drawBorder: false
+                            },
                             ticks: {
                                 color: theme.text,
+                                padding: 12,
                                 font: {
-                                    family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                                    family: 'Outfit, sans-serif',
                                     size: 11,
-                                    weight: '500'
+                                    weight: '600'
                                 },
                                 callback: value => '$' + value.toLocaleString()
                             }
@@ -1577,29 +1648,42 @@
                             grid: { display: false },
                             ticks: {
                                 color: theme.text,
+                                padding: 10,
                                 font: {
-                                    family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                                    family: 'Outfit, sans-serif',
                                     size: 11,
-                                    weight: '500'
+                                    weight: '600'
                                 }
                             }
                         }
                     },
                     plugins: {
-                        legend: {
-                            display: false // Disable internal legend to use custom HTML
-                        },
+                        legend: { display: false },
                         tooltip: {
-                            backgroundColor: theme.tooltipBg,
+                            enabled: true,
+                            position: 'nearest',
+                            backgroundColor: theme.tooltipBg === '#ffffff' ? 'rgba(255, 255, 255, 0.95)' : 'rgba(22, 27, 34, 0.95)',
                             titleColor: theme.tooltipText,
                             bodyColor: theme.tooltipText,
                             borderColor: theme.tooltipBorder,
                             borderWidth: 1,
-                            padding: 12,
-                            boxPadding: 6,
+                            padding: 16,
+                            cornerRadius: 12,
+                            boxPadding: 8,
+                            usePointStyle: true,
+                            bodyFont: {
+                                family: 'Outfit, sans-serif',
+                                size: 13
+                            },
+                            titleFont: {
+                                family: 'Outfit, sans-serif',
+                                size: 14,
+                                weight: '700'
+                            },
                             callbacks: {
                                 label: function (context) {
-                                    return context.dataset.label + ': $' + context.parsed.y.toLocaleString();
+                                    const val = context.parsed.y.toLocaleString(undefined, { minimumFractionDigits: 2 });
+                                    return ` ${context.dataset.label}: $${val}`;
                                 }
                             }
                         },
@@ -1770,7 +1854,7 @@
             // Create a composite canvas with title, legend, and chart
             // The chart is rendered at high DPI, so we need to scale everything to match
             const chartCanvas = document.getElementById('performanceChart');
-            const dpr = Math.max(window.devicePixelRatio, 3); // Match the chart's DPI
+            const dpr = chart.options.devicePixelRatio || window.devicePixelRatio || 1;
 
             // Use scaled values for proper sizing in the high-DPI canvas
             const padding = 60 * dpr;
