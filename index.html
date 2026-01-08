@@ -34,7 +34,7 @@
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
         rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="js/papaparse.min.js"></script>
     <style>
         :root {
             /* 2026 Viral Theme - Dark (Default) */
@@ -105,8 +105,20 @@
                 radial-gradient(circle at 0% 0%, rgba(0, 242, 255, 0.05) 0%, transparent 50%),
                 radial-gradient(circle at 100% 100%, rgba(112, 0, 255, 0.05) 0%, transparent 50%),
                 radial-gradient(circle at 50% 50%, rgba(255, 0, 200, 0.03) 0%, transparent 50%);
+            background-size: 200% 200%;
+            animation: backgroundMovement 20s ease infinite alternate;
             z-index: -2;
             pointer-events: none;
+        }
+
+        @keyframes backgroundMovement {
+            0% {
+                background-position: 0% 0%;
+            }
+
+            100% {
+                background-position: 100% 100%;
+            }
         }
 
         [data-theme="light"] body::before {
@@ -469,8 +481,7 @@
             font-size: 0.9rem;
         }
 
-        /* Animations */
-        @keyframes fadeIn {
+        @keyframes fadeInStagger {
             from {
                 opacity: 0;
                 transform: translateY(20px);
@@ -482,10 +493,54 @@
             }
         }
 
-        .stat-card,
-        .chart-container {
-            animation: fadeIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        .stagger-1 {
+            animation: fadeInStagger 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            opacity: 0;
         }
+
+        .stagger-2 {
+            animation: fadeInStagger 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s forwards;
+            opacity: 0;
+        }
+
+        .stagger-3 {
+            animation: fadeInStagger 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s forwards;
+            opacity: 0;
+        }
+
+        .stagger-4 {
+            animation: fadeInStagger 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s forwards;
+            opacity: 0;
+        }
+
+        .stagger-4 {
+            animation: fadeInStagger 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s forwards;
+            opacity: 0;
+        }
+
+        /* Staggered Cards one-by-one */
+        .stats-grid .stat-card {
+            opacity: 0;
+            animation: fadeInStagger 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        .stats-grid .stat-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .stats-grid .stat-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .stats-grid .stat-card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .stats-grid .stat-card:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        /* Removed default fade in to use staggered classes */
 
         .segmented-control {
             display: flex;
@@ -1249,8 +1304,73 @@
         }
     </style>
 </head>
+</style>
+<style>
+    /* Donut Charts Grid */
+    .donuts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 30px;
+        justify-items: center;
+    }
+
+    .donut-wrapper {
+        text-align: center;
+        width: 100%;
+        max-width: 250px;
+    }
+
+    .donut-wrapper h5 {
+        font-size: 1rem;
+        margin-bottom: 15px;
+        color: var(--text-main);
+        font-weight: 600;
+    }
+
+    .canvas-container {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 1;
+    }
+
+    /* Ticker Styles */
+    /* Ticker Styles (Inline Badge) */
+    .experiment-status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(128, 128, 128, 0.1);
+        border: 1px solid var(--glass-border);
+        padding: 6px 16px;
+        border-radius: 99px;
+        font-size: 0.85rem;
+        color: var(--text-dim);
+        margin-top: 16px;
+        margin-bottom: 8px;
+        backdrop-filter: blur(4px);
+    }
+
+    .status-dot {
+        width: 6px;
+        height: 6px;
+        background-color: #f85149;
+        border-radius: 50%;
+        box-shadow: 0 0 8px #f85149;
+        animation: pulse-red 1.5s infinite;
+    }
+
+    .ticker-highlight {
+        color: var(--text-main);
+        font-weight: 600;
+        font-family: 'JetBrains Mono', monospace;
+        margin-left: 4px;
+    }
+</style>
+</head>
 
 <body>
+    <!-- Top Ticker -->
+    <!-- Top Ticker Removed -->
     <div class="test-banner" id="testBanner" style="display: none;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;">
@@ -1261,7 +1381,7 @@
         TEST MODE: Displaying Simulated Performance Data
     </div>
     <div class="container">
-        <header>
+        <header class="stagger-1">
             <div class="theme-switch" id="themeToggle">
                 <div class="theme-switch-track">
                     <div class="theme-switch-icons">
@@ -1289,11 +1409,7 @@
                     <div class="theme-switch-thumb"></div>
                 </div>
             </div>
-            <div class="market-status-pill"
-                style="display: flex; align-items: center; gap: 8px; margin-bottom: 20px; background: rgba(0, 242, 255, 0.1); padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(0, 242, 255, 0.2); font-size: 0.75rem; font-weight: 700; color: var(--accent-primary); letter-spacing: 0.5px;">
-                <span class="market-indicator open"></span>
-                LIVE EXPERIMENT
-            </div>
+            <!-- Removed default pill, moved to ticker -->
             <h1>AI Portfolio Experiment</h1>
             <p class="subtitle">
                 Comparing four $1,000 investment portfolios managed by AI.
@@ -1320,6 +1436,15 @@
                     </a>
                 </span>
             </p>
+
+            <!-- Inline Status Badge -->
+            <div id="countdownBanner" class="experiment-status-badge">
+                <span class="status-dot"></span>
+                <span>LIVE EXPERIMENT</span>
+                <span style="opacity: 0.3; margin: 0 4px;">|</span>
+                <span>Ends in</span>
+                <span class="ticker-highlight" id="countdownValue">-- days</span>
+            </div>
         </header>
 
 
@@ -1349,7 +1474,7 @@
             </div>
         </div>
 
-        <div class="chart-container">
+        <div class="chart-container stagger-3">
             <div class="chart-header">
                 <div>
                     <h2>Equity Growth Over Time</h2>
@@ -1381,7 +1506,7 @@
         </div>
 
         <!-- Activity Feed -->
-        <div class="activity-feed-section">
+        <div class="activity-feed-section stagger-4">
             <h2>Recent Activity</h2>
             <div id="activityFeed" class="activity-feed">
                 <!-- Activity items will be populated by JS -->
@@ -1389,7 +1514,7 @@
             </div>
         </div>
 
-        <div class="portfolio-section">
+        <div class="portfolio-section stagger-4">
             <div class="portfolio-header">
                 <h2>Portfolio Holdings</h2>
                 <div class="date-selector">
@@ -1404,36 +1529,9 @@
             </div>
         </div>
 
-        <div class="chart-container" style="margin-top: 40px; padding: 0; overflow: hidden;">
-            <div
-                style="padding: 24px 30px; border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center;">
-                <h2 style="font-size: 1.3rem; font-weight: 600;">Performance History</h2>
-            </div>
-            <div style="overflow-x: auto;">
-                <table id="historyTable"
-                    style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem;">
-                    <thead>
-                        <tr
-                            style="background: rgba(255,255,255,0.03); color: var(--text-dim); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">
-                            <th style="padding: 16px 30px; border-bottom: 1px solid var(--glass-border);">Date</th>
-                            <th style="padding: 16px 20px; border-bottom: 1px solid var(--glass-border);">ChatGPT</th>
-                            <th style="padding: 16px 20px; border-bottom: 1px solid var(--glass-border);">Gemini</th>
-                            <th style="padding: 16px 20px; border-bottom: 1px solid var(--glass-border);">Claude</th>
-                            <th style="padding: 16px 20px; border-bottom: 1px solid var(--glass-border);">Perplexity
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody id="historyBody">
-                        <!-- History rows will be injected here -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        <!-- Donut Charts Removed -->
 
         <footer class="footer">
-            <div id="countdownBanner" class="countdown-footer">
-                Experiment ends in <span class="countdown-value" id="countdownValue">-- days</span>
-            </div>
             <p style="margin-bottom: 8px;"><strong>Disclaimer:</strong> This is a research experiment for educational
                 purposes only. It is not financial advice. Past performance is not indicative of future results.</p>
             <p>&copy; 2026 AI Portfolio Experiment. Built for Deep Research AI Analysis.</p>
@@ -1508,8 +1606,9 @@
         setTheme(savedTheme);
 
         document.addEventListener('DOMContentLoaded', function () {
-            const csvPath = 'logs/performance.csv';
-            const lastUpdatedPath = 'logs/last_updated.json';
+            const timestamp = new Date().getTime();
+            const csvPath = `logs/performance.csv?t=${timestamp}`;
+            const lastUpdatedPath = `logs/last_updated.json?t=${timestamp}`;
 
             // Fetch last updated timestamp
             fetch(lastUpdatedPath)
@@ -1523,22 +1622,31 @@
 
             fetch(csvPath)
                 .then(response => {
-                    if (!response.ok) throw new Error('File not found');
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     return response.text();
                 })
                 .then(text => {
+                    if (typeof Papa === 'undefined') throw new Error('PapaParse library not loaded');
                     Papa.parse(text, {
                         header: true,
                         dynamicTyping: true,
                         skipEmptyLines: true,
                         complete: function (results) {
+                            if (results.data.length === 0) {
+                                console.warn('CSV is empty');
+                                return;
+                            }
                             processData(results.data);
+                        },
+                        error: function (err) {
+                            throw new Error(`Parse error: ${err.message}`);
                         }
                     });
                 })
                 .catch(err => {
-                    console.log('Auto-fetch failed.', err);
-                    document.getElementById('lastSync').textContent = 'Error loading data from logs/performance.csv';
+                    console.error('Auto-fetch failed:', err);
+                    const syncEl = document.getElementById('lastSync');
+                    if (syncEl) syncEl.textContent = `Data Error: ${err.message}`;
                 });
         });
 
@@ -1630,28 +1738,9 @@
 
             renderChart(labels, datasets);
             updateStats(latestRow);
-            updateHistoryTable(cleanData);
         }
 
-        function updateHistoryTable(data) {
-            const body = document.getElementById('historyBody');
-            body.innerHTML = '';
 
-            // Show latest first
-            [...data].reverse().forEach(row => {
-                const tr = document.createElement('tr');
-                tr.style.borderBottom = '1px solid var(--glass-border)';
-
-                tr.innerHTML = `
-                    <td style="padding: 16px 30px; font-weight: 500;">${row.Date}</td>
-                    <td style="padding: 16px 20px;">$${Number(row.ChatGPT || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                    <td style="padding: 16px 20px;">$${Number(row.Gemini || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                    <td style="padding: 16px 20px;">$${Number(row.Claude || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                    <td style="padding: 16px 20px;">$${Number(row.Perplexity || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                `;
-                body.appendChild(tr);
-            });
-        }
 
         function getThemeColors() {
             const isLight = document.documentElement.getAttribute('data-theme') === 'light';
@@ -2204,6 +2293,7 @@
 
             // Show the latest date by default
             renderHoldings(dates[0]);
+            // renderDonutCharts(dates[0]); // REMOVED
         }
 
         holdingsDateSelect.addEventListener('change', function () {
@@ -2415,6 +2505,94 @@
             interval = seconds / 60;
             if (interval > 1) return Math.floor(interval) + "m ago";
             return "Just now";
+        }
+
+        // Global Donut Chart Instances to manage updates
+        const donutInstances = {};
+
+        function renderDonutCharts(date) {
+            if (!portfolioData[date]) return;
+            const dayData = portfolioData[date];
+
+            modelOrder.forEach(model => {
+                const canvasId = `donut-${model}`;
+                const canvas = document.getElementById(canvasId);
+                if (!canvas) return;
+
+                const modelData = dayData[model];
+                let holdings = Array.isArray(modelData) ? modelData : (modelData.positions || []);
+                const cashValue = Array.isArray(modelData) ? (1000 - holdings.reduce((s, h) => s + h.market_value, 0)) : parseFloat(modelData.cash || 0);
+
+                // Aggregate by Sector
+                const sectorMap = { 'Cash': cashValue };
+                holdings.forEach(h => {
+                    const sector = h.sector && h.sector !== 'Unknown' ? h.sector.split(' ')[0] : 'Other'; // Simplified sector key
+                    if (!sectorMap[sector]) sectorMap[sector] = 0;
+                    sectorMap[sector] += h.market_value;
+                });
+
+                // Prepare Data
+                const labels = Object.keys(sectorMap);
+                const dataValues = Object.values(sectorMap);
+
+                // Colors
+                const sectorColors = {
+                    'Healthcare': '#10b981', 'Technology': '#3b82f6', 'Energy': '#f59e0b',
+                    'Consumer': '#ec4899', 'Financial': '#8b5cf6', 'Industrials': '#6366f1',
+                    'Materials': '#14b8a6', 'Utilities': '#84cc16', 'Real': '#f97316',
+                    'Communication': '#06b6d4', 'Other': '#6b7280', 'Cash': 'rgba(128,128,128,0.2)'
+                };
+                const bgColors = labels.map(l => {
+                    // Match fuzzy keys (e.g. 'Tech' matches 'Technology')
+                    const key = Object.keys(sectorColors).find(k => k.toLowerCase().startsWith(l.toLowerCase())) || 'Other';
+                    // Specific case for Cash
+                    if (l === 'Cash') return sectorColors['Cash'];
+                    return sectorColors[key];
+                });
+
+                // Destroy existing chart if any
+                if (donutInstances[model]) {
+                    donutInstances[model].destroy();
+                }
+
+                // Render Chart
+                donutInstances[model] = new Chart(canvas, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: dataValues,
+                            backgroundColor: bgColors,
+                            borderColor: 'transparent',
+                            borderWidth: 0,
+                            hoverOffset: 10
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        cutout: '75%',
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(0,0,0,0.8)',
+                                bodyColor: '#fff',
+                                callbacks: {
+                                    label: function (context) {
+                                        const val = context.raw;
+                                        const total = context.chart._metasets[context.datasetIndex].total;
+                                        const pct = (val / total * 100).toFixed(1);
+                                        return `${context.label}: ${pct}%`;
+                                    }
+                                }
+                            }
+                        },
+                        animation: {
+                            animateScale: true,
+                            animateRotate: true
+                        }
+                    }
+                });
+            });
         }
 
         // Load portfolios and transactions on page load
