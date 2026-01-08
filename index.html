@@ -546,17 +546,34 @@
         }
 
         .holdings-card {
-            background: var(--card-bg);
+            background: linear-gradient(135deg, var(--card-bg) 0%, rgba(255, 255, 255, 0.02) 100%);
             border: 1px solid var(--glass-border);
             border-radius: 16px;
             overflow: hidden;
-            box-shadow: var(--shadow);
-            transition: transform 0.3s ease, border-color 0.3s ease;
+            box-shadow: var(--shadow), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .holdings-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #10b981, #f59e0b, #ec4899);
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         .holdings-card:hover {
-            transform: translateY(-3px);
-            border-color: var(--accent-primary);
+            transform: translateY(-5px);
+            box-shadow: var(--shadow), 0 20px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(59, 130, 246, 0.3);
+        }
+
+        .holdings-card:hover::before {
+            opacity: 1;
         }
 
         .holdings-card-header {
@@ -620,6 +637,307 @@
 
         .holding-pl.negative {
             color: #f85149;
+        }
+
+        /* Activity Feed */
+        .activity-feed-section {
+            margin-bottom: 30px;
+        }
+
+        .activity-feed {
+            max-height: 400px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding-right: 8px;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 12px 16px;
+            border: 1px solid var(--glass-border);
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .activity-item:hover {
+            transform: translateX(4px);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .activity-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .activity-icon.buy {
+            background: rgba(63, 185, 80, 0.15);
+            color: #3fb950;
+        }
+
+        .activity-icon.sell {
+            background: rgba(248, 81, 73, 0.15);
+            color: #f85149;
+        }
+
+        .activity-content {
+            flex-grow: 1;
+            font-size: 0.9rem;
+            color: var(--text-main);
+        }
+
+        .activity-time {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            min-width: 80px;
+            text-align: right;
+        }
+
+        /* Allocation Bar */
+        .allocation-bar-container {
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+            height: 8px;
+            display: flex;
+        }
+
+        .alloc-segment {
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+
+        .alloc-stocks {
+            background: var(--accent-success);
+        }
+
+        .alloc-cash {
+            background: var(--text-dim);
+            opacity: 0.3;
+        }
+
+        .allocation-stats {
+            display: flex;
+            gap: 15px;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-bottom: 12px;
+            margin-top: -15px;
+        }
+
+        /* Sector Badge - refined */
+        .sector-badge {
+            display: inline-block;
+            font-size: 0.6rem;
+            padding: 1px 5px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-dim);
+            margin-left: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            vertical-align: middle;
+        }
+
+        .holdings-card-body {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Modern 2-Column Grid for Holdings */
+        .holding-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .h-col-ticker {
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .h-col-stats {
+            text-align: right;
+        }
+
+        .holding-ticker {
+            font-weight: 700;
+            color: var(--text-main);
+            font-size: 1rem;
+        }
+
+        /* Sector Dot with Tooltip */
+        .sector-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #6b7280;
+            cursor: help;
+        }
+
+        .sector-dot.healthcare {
+            background-color: #10b981;
+        }
+
+        .sector-dot.technology {
+            background-color: #3b82f6;
+        }
+
+        .sector-dot.energy {
+            background-color: #f59e0b;
+        }
+
+        .sector-dot.consumer {
+            background-color: #ec4899;
+        }
+
+        .sector-dot.financial {
+            background-color: #8b5cf6;
+        }
+
+        .sector-dot.industrial {
+            background-color: #6366f1;
+        }
+
+        .stats-primary {
+            display: flex;
+            justify-content: flex-end;
+            align-items: baseline;
+            gap: 12px;
+            font-size: 0.95rem;
+        }
+
+        .stats-value {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .stats-pnl {
+            font-weight: 600;
+        }
+
+        .stats-secondary {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            margin-top: 2px;
+        }
+
+        .holding-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        /* Allocation Visualization - Enhanced */
+        .allocation-display {
+            margin-bottom: 16px;
+        }
+
+        .allocation-bar-wrapper {
+            margin-bottom: 6px;
+        }
+
+        .allocation-bar-track {
+            width: 100%;
+            height: 14px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid rgba(128, 128, 128, 0.2);
+            border-radius: 7px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            cursor: help;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .allocation-bar-track:hover {
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1), 0 0 8px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Bar segments for sector-colored allocation */
+        .bar-segment {
+            height: 100%;
+            display: inline-block;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .bar-segment:hover {
+            transform: scaleY(1.3);
+            filter: brightness(1.2);
+            z-index: 10;
+        }
+
+        .bar-segment:first-child {
+            border-radius: 6px 0 0 6px;
+        }
+
+        .bar-segment:last-child {
+            border-radius: 0 6px 6px 0;
+        }
+
+        .bar-segment:only-child {
+            border-radius: 6px;
+        }
+
+        /* Cash segment with inline label */
+        .bar-segment.bar-cash {
+            background-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cash-label {
+            font-size: 0.6rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .allocation-summary {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            text-align: center;
+            margin-top: 6px;
+        }
+
+        .allocation-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            margin-top: 4px;
+        }
+
+        .alloc-label-invested {
+            font-weight: 600;
+        }
+
+        .allocation-values {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+
+        .allocation-values strong {
+            color: var(--text-main);
         }
 
         .empty-holdings {
@@ -919,7 +1237,15 @@
             <canvas id="performanceChart"></canvas>
         </div>
 
-        <!-- Portfolio Holdings Section -->
+        <!-- Activity Feed -->
+        <div class="activity-feed-section">
+            <h2>Recent Activity</h2>
+            <div id="activityFeed" class="activity-feed">
+                <!-- Activity items will be populated by JS -->
+                <div style="padding: 20px; text-align: center; color: var(--text-dim);">Loading activity...</div>
+            </div>
+        </div>
+
         <div class="portfolio-section">
             <div class="portfolio-header">
                 <h2>Portfolio Holdings</h2>
@@ -1576,38 +1902,79 @@
             holdingsGrid.innerHTML = '';
 
             modelOrder.forEach(model => {
-                const holdings = dayData[model] || [];
+                const modelData = dayData[model];
+
+                // Handle both old (list) and new (dict) data structures
+                let holdings = [];
+                let cash = 0, equity = 0;
+
+                if (Array.isArray(modelData)) {
+                    // Old format (backup)
+                    holdings = modelData;
+                    const stockVal = holdings.reduce((sum, h) => sum + h.market_value, 0);
+                    totalValue = 1000; // Assume baseline for old data
+                    investedValue = stockVal;
+                    cashValue = 1000 - stockVal;
+                } else {
+                    // New format (Alpaca Data)
+                    holdings = modelData.positions || [];
+                    totalValue = parseFloat(modelData.equity || 0);
+                    cashValue = parseFloat(modelData.cash || 0);
+                    investedValue = totalValue - cashValue;
+
+                    // Sanity check: if invested < 0 (due to margin/settlement timing), clamp to 0
+                    if (investedValue < 0) investedValue = 0;
+                }
+
+                const investedPct = totalValue > 0 ? (investedValue / totalValue) * 100 : 0;
+                // const cashPct = totalValue > 0 ? (cashValue / totalValue) * 100 : 0; // Unused for bar width if we just use background
+
                 const card = document.createElement('div');
                 card.className = 'holdings-card';
 
-                let bodyContent = '';
-                if (holdings.length === 0) {
-                    bodyContent = '<p class="empty-holdings">All Cash</p>';
-                } else {
-                    holdings.forEach(h => {
-                        const plClass = h.unrealized_pl_pct >= 0 ? 'positive' : 'negative';
-                        const plSign = h.unrealized_pl_pct >= 0 ? '+' : '';
-                        bodyContent += `
-                            <div class="holding-row">
-                                <div>
-                                    <span class="holding-ticker">${h.ticker}</span>
-                                </div>
-                                <div class="holding-details">
-                                    <div class="holding-qty">${h.qty} shares</div>
-                                    <div class="holding-pl ${plClass}">${plSign}${h.unrealized_pl_pct.toFixed(2)}%</div>
-                                </div>
-                            </div>
-                        `;
-                    });
-                }
+                // Build sector-colored bar segments
+                const sectorColors = {
+                    'healthcare': '#10b981',
+                    'technology': '#3b82f6',
+                    'energy': '#f59e0b',
+                    'consumer': '#ec4899',
+                    'financial': '#8b5cf6',
+                    'industrials': '#6366f1',
+                    'materials': '#14b8a6',
+                    'utilities': '#84cc16',
+                    'real': '#f97316',       // Real Estate
+                    'communication': '#06b6d4',
+                    'unknown': '#6b7280'
+                };
+
+                let barSegmentsHtml = '';
+                holdings.forEach(h => {
+                    const holdingPct = totalValue > 0 ? (h.market_value / totalValue) * 100 : 0;
+                    const sectorKey = (h.sector || 'unknown').toLowerCase().split(' ')[0];
+                    const segmentColor = sectorColors[sectorKey] || sectorColors['unknown'];
+                    // Enhanced tooltip with value
+                    barSegmentsHtml += `<div class="bar-segment" style="width: ${holdingPct}%; background-color: ${segmentColor};" title="${h.ticker} · $${h.market_value.toFixed(0)} · ${h.sector || 'Unknown'}"></div>`;
+                });
+
+                // Add cash segment (empty track with tooltip)
+                const cashPct = 100 - investedPct;
 
                 card.innerHTML = `
                     <div class="holdings-card-header">
-                        <div class="model-dot" style="background-color: ${colors[model]}"></div>
                         <h3>${model}</h3>
                     </div>
                     <div class="holdings-card-body">
-                        ${bodyContent}
+                        <!-- Sector-Colored Allocation Bar -->
+                        <div class="allocation-display">
+                            <div class="allocation-bar-track" title="Cash: $${cashValue.toFixed(2)}">
+                                ${barSegmentsHtml}
+                            </div>
+                            <div class="allocation-summary">
+                                ${holdings.length} holding${holdings.length !== 1 ? 's' : ''} · ${investedPct.toFixed(0)}% invested · $${cashValue.toFixed(0)} cash
+                            </div>
+                        </div>
+                        
+                        ${renderHoldingsList(holdings, totalValue, sectorColors)}
                     </div>
                 `;
 
@@ -1615,8 +1982,128 @@
             });
         }
 
-        // Load portfolios on page load
-        document.addEventListener('DOMContentLoaded', loadPortfolios);
+        function renderHoldingsList(holdings, totalValue, sectorColors) {
+            if (holdings.length === 0) {
+                return `<p class="empty-holdings">All Cash Strategy</p>`;
+            }
+
+            let html = '';
+            holdings.forEach(h => {
+                const plClass = h.unrealized_pl_pct >= 0 ? 'positive' : 'negative';
+                const plSign = h.unrealized_pl_pct >= 0 ? '+' : '';
+
+                // Sector Dot with color from sectorColors map
+                let sectorDot = '';
+                if (h.sector && h.sector !== 'Unknown') {
+                    const sectorKey = h.sector.toLowerCase().split(' ')[0];
+                    const dotColor = sectorColors[sectorKey] || sectorColors['unknown'] || '#6b7280';
+                    sectorDot = `<span class="sector-dot" style="background-color: ${dotColor};" title="${h.sector}"></span>`;
+                }
+
+                html += `
+                    <div class="holding-row">
+                        <div class="h-col-ticker">
+                            <span class="holding-ticker">${h.ticker}</span>
+                            ${sectorDot}
+                        </div>
+                        <div class="h-col-stats">
+                            <div class="stats-primary">
+                                <span class="stats-value">$${h.market_value.toFixed(2)}</span>
+                                <span class="stats-pnl ${plClass}">${plSign}${h.unrealized_pl_pct.toFixed(1)}%</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            return html;
+        }
+
+        // Activity Feed Logic
+        const activityFeed = document.getElementById('activityFeed');
+        function loadTransactions() {
+            fetch('logs/transactions.json')
+                .then(res => {
+                    if (!res.ok) throw new Error('Transactions not found');
+                    return res.json();
+                })
+                .then(data => {
+                    renderActivityFeed(data);
+                })
+                .catch(err => {
+                    console.log(err);
+                    activityFeed.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-dim);">No recent activity found.</div>';
+                });
+        }
+
+        function renderActivityFeed(transactions) {
+            // Flatten and sort transactions by timestamp (newest first)
+            let allTxs = [];
+            Object.keys(transactions).forEach(model => {
+                transactions[model].forEach(tx => {
+                    allTxs.push({ ...tx, model });
+                });
+            });
+
+            allTxs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            // Limit to recent 20
+            allTxs = allTxs.slice(0, 20);
+
+            if (allTxs.length === 0) {
+                activityFeed.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-dim);">No transactions yet.</div>';
+                return;
+            }
+
+            activityFeed.innerHTML = '';
+
+            allTxs.forEach(tx => {
+                const isBuy = tx.side === 'buy';
+                const timeStr = new Date(tx.timestamp).toLocaleString();
+
+                const item = document.createElement('div');
+                item.className = 'activity-item';
+
+                const iconSvg = isBuy
+                    ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>`
+                    : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>`;
+
+                item.innerHTML = `
+                    <div class="activity-icon ${isBuy ? 'buy' : 'sell'}">
+                        ${iconSvg}
+                    </div>
+                    <div class="activity-content">
+                        <strong>${tx.model}</strong> ${tx.side === 'buy' ? 'bought' : 'sold'} 
+                        <strong>${tx.qty} ${tx.symbol}</strong> at $${tx.price.toFixed(2)}
+                    </div>
+                    <div class="activity-time">
+                        ${timeAgo(new Date(tx.timestamp))}
+                    </div>
+                `;
+                activityFeed.appendChild(item);
+            });
+        }
+
+        // Helper for time ago
+        function timeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            let interval = seconds / 31536000;
+            if (interval > 1) return Math.floor(interval) + "y ago";
+            interval = seconds / 2592000;
+            if (interval > 1) return Math.floor(interval) + "m ago";
+            interval = seconds / 86400;
+            if (interval > 1) return Math.floor(interval) + "d ago";
+            interval = seconds / 3600;
+            if (interval > 1) return Math.floor(interval) + "h ago";
+            interval = seconds / 60;
+            if (interval > 1) return Math.floor(interval) + "m ago";
+            return "Just now";
+        }
+
+        // Load portfolios and transactions on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadPortfolios();
+            loadTransactions();
+        });
     </script>
 </body>
 
