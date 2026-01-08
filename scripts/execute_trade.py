@@ -213,7 +213,7 @@ def parse_clipboard_trades():
     # -----------------------------
     # 3) REGEX FALLBACK (last resort)
     # -----------------------------
-    pattern = r"(?:^|[,\s|])\s*(BUY|SELL|HOLD)\s*[,\s|]\s*([A-Z]+)\s*[,\s|]\s*([A-Z0-9\.]+)\s*[,\s|]\s*([A-Z\s/]+)\s*[,\s|]\s*(\$?[NA\d\.\-]+)\s*[,\s|]\s*(\$?[NA\d\.\-]+)\s*(?:[,\s|]\s*(\$?[NA\d\.\-]+))?"
+    pattern = r"(?:^|[,\s|])\s*(BUY|SELL|HOLD|CANCEL)\s*[,\s|]\s*([A-Z]+)\s*[,\s|]\s*([A-Z0-9\.]+)\s*[,\s|]\s*([A-Z\s/]+)\s*[,\s|]\s*(\$?[NA\d\.\-]+)\s*[,\s|]\s*(\$?[NA\d\.\-]+)\s*(?:[,\s|]\s*(\$?[NA\d\.\-]+))?"
     matches = re.findall(pattern, text, re.IGNORECASE | re.MULTILINE)
     for m in matches:
         trades.append(
@@ -346,6 +346,39 @@ def execute_trade(trade, dry_run=False):
         else:
             log_execution(f"\n✋ HOLDING: {ticker} (No stop-loss specified)")
         return
+
+    if action == "CANCEL":
+        log_execution(f"\n🚫 PROCESSING CANCEL: {ticker}")
+        try:
+            open_orders = api.list_orders(status="open", symbols=[ticker])
+            if not open_orders:
+                log_execution(f"   ⚠️ No open orders found for {ticker}. Nothing to cancel.")
+                return
+
+            log_execution(f"   🧹 Cancelling {len(open_orders)} open order(s) for {ticker}...")
+            for o in open_orders:
+                if dry_run:
+                    price_str = (
+                        f"@ ${float(o.limit_price):.2f}" if o.limit_price
+                        else (f"Stop @ ${float(o.stop_price):.2f}" if o.stop_price else "MARKET")
+                    )
+                    log_execution(f"   [DRY RUN] Would cancel {o.side.upper()} {o.type.upper()} order {price_str}")
+                else:
+                    api.cancel_order(o.id)
+                    log_execution(f"   ✅ Cancelled order {o.id}")
+
+            if not dry_run:
+                # Wait for cancellations to process
+                time.sleep(1)
+                remaining = api.list_orders(status="open", symbols=[ticker])
+                if remaining:
+                    log_execution(f"   ⚠️ {len(remaining)} order(s) still pending cancellation for {ticker}.")
+                else:
+                    log_execution(f"   ✅ All orders for {ticker} successfully cancelled.")
+        except Exception as e:
+            log_execution(f"   ❌ CANCEL FAILED: {e}")
+        return
+
     try:
         if action == "SELL":
             log_execution(f"\n📉 PROCESSING SELL: {ticker}")

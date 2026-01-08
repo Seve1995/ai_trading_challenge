@@ -141,6 +141,7 @@ def generate_daily_prompt():
     try:
         account = api.get_account()
         positions = api.list_positions()
+        orders = api.list_orders(status='open')
     except Exception as e:
         print(f"❌ Alpaca Error: {e}")
         return
@@ -168,6 +169,23 @@ def generate_daily_prompt():
     else:
         holdings_txt = "No current positions."
 
+    # Pending Orders
+    orders_lines = []
+    if orders:
+        print(f"   ... Found {len(orders)} pending orders ...")
+        for o in orders:
+            # Format: SIDE SYMBOL QTY @ LIMIT/STOP PRICE (TYPE)
+            details = []
+            if o.limit_price: details.append(f"Lim: ${float(o.limit_price):.2f}")
+            if o.stop_price: details.append(f"Stop: ${float(o.stop_price):.2f}")
+            price_info = " | ".join(details)
+            orders_lines.append(
+                f"- {o.side.upper()} {o.symbol} {o.qty} ({o.type.upper()}) {price_info}"
+            )
+        orders_txt = "\n".join(orders_lines)
+    else:
+        orders_txt = "No pending orders."
+
     # -------------------------------------------------
     # FINAL PROMPT
     # -------------------------------------------------
@@ -183,6 +201,9 @@ def generate_daily_prompt():
 
 **CURRENT HOLDINGS (STANDARDIZED LAST-CLOSE DATA):**
 {holdings_txt}
+
+**PENDING ORDERS:**
+{orders_txt}
 
 **ROLE:**
 You are a Senior Portfolio Manager running a rules-based experiment.
@@ -215,13 +236,25 @@ HOLD if not selling:
   Risk management for existing holdings is STOP_LOSS ONLY.
 
 ------------------------------------------------------------
-## PHASE 1 — MACRO GATE (NEW BUYS ONLY)
-If TNX is up >= +2.00% vs prior close:
-- NO NEW BUYS today.
-- SELLs and HOLD stop updates are still allowed.
+## PHASE 1 — PENDING ORDER REVIEW
+For EACH pending order:
+- Evaluate if the order is still valid.
+
+CANCEL if:
+- Order is stale (price moved >10% away from limit).
+- Thesis invalidated or catalyst passed.
+- You are about to SELL the same ticker (existing sell orders are auto-cancelled).
+
+KEEP (do not output) if order is still valid and should remain open.
 
 ------------------------------------------------------------
-## PHASE 2 — SCANNER (MAX ONE BUY)
+## PHASE 2 — MACRO GATE (NEW BUYS ONLY)
+If TNX is up >= +2.00% vs prior close:
+- NO NEW BUYS today.
+- SELLs, CANCELs, and HOLD stop updates are still allowed.
+
+------------------------------------------------------------
+## PHASE 3 — SCANNER (MAX ONE BUY)
 Only if Macro allows:
 
 UNIVERSE:
@@ -249,16 +282,17 @@ ORDER:
 - If numbers are uncertain → NO BUY
 
 ------------------------------------------------------------
-## PHASE 3 — EXECUTION TABLE
+## PHASE 4 — EXECUTION TABLE
 
 | ACTION | TICKER | QTY | TYPE | LIMIT_PRICE | STOP_LOSS | TAKE_PROFIT | REASON |
 | :--- | :--- | :---: | :--- | :---: | :---: | :---: | :--- |
 
 Rules:
-- ACTION: BUY, SELL, HOLD, NO_TRADES
+- ACTION: BUY, SELL, HOLD, CANCEL, NO_TRADES
 - SELL: MARKET, prices = 0.00
 - BUY: LIMIT, numeric prices
 - HOLD: TYPE=N/A, TAKE_PROFIT=N/A
+- CANCEL: TYPE=N/A, all prices = N/A (cancels all open orders for ticker)
 - Do NOT buy tickers already held
 
 If no actions:
