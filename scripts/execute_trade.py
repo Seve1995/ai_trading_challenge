@@ -139,10 +139,8 @@ def parse_clipboard_trades():
     log_execution(text)
     log_execution("-" * 20 + "\n")
 
-    # Quick NO_TRADES detection (text-level)
-    if "NO_TRADES" in text.upper() or "NO TRADES" in text.upper():
-        log_execution("🛑 AI Signal: Maintain Current Portfolio (No new trades recommended).")
-        return []
+    # Note: NO_TRADES rows are handled at the row level during parsing
+    # This allows other rows (HOLD, SELL, etc.) to be processed even if NO_TRADES is present
 
     lines = [l.strip() for l in text.splitlines() if l.strip()]
     trades = []
@@ -166,8 +164,8 @@ def parse_clipboard_trades():
                 trade = {canonical: row.get(original) for canonical, original in h_map.items()}
                 if trade.get("ACTION") and trade.get("TICKER"):
                     if clean_val(trade.get("ACTION")) == "NO_TRADES":
-                        log_execution("🛑 AI Signal: Maintain Current Portfolio (CSV row signal).")
-                        return []
+                        # Skip NO_TRADES rows but continue processing other rows
+                        continue
                     trades.append(trade)
 
         if trades:
@@ -202,8 +200,8 @@ def parse_clipboard_trades():
                 trade = {canonical: row.get(original) for canonical, original in h_map.items()}
                 if trade.get("ACTION") and trade.get("TICKER"):
                     if clean_val(trade.get("ACTION")) == "NO_TRADES":
-                        log_execution("🛑 AI Signal: Maintain Current Portfolio (Table row signal).")
-                        return []
+                        # Skip NO_TRADES rows but continue processing other rows
+                        continue
                     trades.append(trade)
 
     if trades:
