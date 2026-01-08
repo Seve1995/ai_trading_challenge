@@ -28,37 +28,47 @@
     <meta name="twitter:image" content="https://seve1995.github.io/ai-portfolio-experiment/og-image.png">
 
     <title>AI Portfolio Experiment | Performance Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
         :root {
-            /* Dark Mode (Default) */
-            --bg-color: #0b0e14;
-            --card-bg: #161b22;
-            --accent-primary: #58a6ff;
-            --accent-secondary: #bc8cff;
-            --text-main: #c9d1d9;
+            /* 2026 Viral Theme - Dark (Default) */
+            --bg-color: #05070a;
+            --card-bg: rgba(13, 17, 23, 0.7);
+            --accent-primary: #00f2ff;
+            /* Cyber Cyan */
+            --accent-secondary: #7000ff;
+            /* Neon Purple */
+            --accent-tertiary: #ff00c8;
+            /* Hot Pink */
+            --text-main: #e6edf3;
             --text-value: #ffffff;
-            --text-dim: #8b949e;
-            --glass-bg: rgba(22, 27, 34, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --chart-grid: rgba(255, 255, 255, 0.05);
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            --text-dim: #9198a1;
+            --glass-bg: rgba(13, 17, 23, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --chart-grid: rgba(255, 255, 255, 0.03);
+            --shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            --glow: 0 0 15px rgba(0, 242, 255, 0.3);
         }
 
         [data-theme="light"] {
-            --bg-color: #f0f4f8;
-            --card-bg: #ffffff;
-            --accent-primary: #0969da;
-            --accent-secondary: #8250df;
-            --text-main: #1f2328;
-            --text-value: #1f2328;
-            --text-dim: #656d76;
-            --glass-bg: rgba(255, 255, 255, 0.8);
-            --glass-border: rgba(31, 35, 40, 0.1);
-            --chart-grid: rgba(31, 35, 40, 0.05);
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            --bg-color: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --accent-primary: #0070f3;
+            --accent-secondary: #7928ca;
+            --text-main: #0f172a;
+            --text-value: #0f172a;
+            --text-dim: #64748b;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --chart-grid: rgba(0, 0, 0, 0.02);
+            --shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
+            --glow: 0 0 15px rgba(0, 112, 243, 0.2);
         }
 
         * {
@@ -77,6 +87,32 @@
             padding: 40px 20px;
             overflow-x: hidden;
             text-rendering: optimizeLegibility;
+            position: relative;
+            font-size: 16px;
+            /* Bumper up generic size */
+            letter-spacing: -0.01em;
+        }
+
+        /* Dynamic Mesh Gradient Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 0% 0%, rgba(0, 242, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(112, 0, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(255, 0, 200, 0.03) 0%, transparent 50%);
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        [data-theme="light"] body::before {
+            background:
+                radial-gradient(circle at 0% 0%, rgba(0, 112, 243, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(121, 40, 202, 0.03) 0%, transparent 50%);
         }
 
         .container {
@@ -164,13 +200,43 @@
         }
 
         h1 {
-            font-size: 2.5rem;
-            font-weight: 600;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            -webkit-background-clip: text;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(-45deg, #00f2ff, #7000ff, #ff00c8, #00f2ff);
+            background-size: 300%;
             background-clip: text;
+            -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
+            animation: gradientHeading 8s ease infinite;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            margin-bottom: 15px;
+        }
+
+        /* Monospace for Numbers (The "Pro" Look) */
+        .mono-font,
+        .value,
+        .change,
+        .stat-card .value,
+        .chart-tooltip-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-feature-settings: "zero" 1;
+            /* Slashed zero */
+        }
+
+        @keyframes gradientHeading {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
         }
 
         p.subtitle {
@@ -222,10 +288,19 @@
             flex: 1;
             min-width: 280px;
             background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 24px;
+            border-radius: 20px;
+            padding: 30px;
             box-shadow: var(--shadow);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .intro-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent-primary);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
         }
 
         .intro-card h3 {
@@ -298,20 +373,22 @@
 
         .stat-card {
             background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 24px;
+            border-radius: 20px;
+            padding: 30px;
             box-shadow: var(--shadow);
             position: relative;
             overflow: hidden;
-            transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1), border-color 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 1;
-            /* Note: NO backdrop-filter here to preserve subpixel antialiasing */
         }
 
         .stat-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-10px) scale(1.02);
             border-color: var(--accent-primary);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
         }
 
         .stat-card h3 {
@@ -352,14 +429,16 @@
 
         .chart-container {
             background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 30px;
+            border-radius: 24px;
+            padding: 40px;
             box-shadow: var(--shadow);
             position: relative;
             overflow: hidden;
             z-index: 1;
-            /* Note: NO backdrop-filter here to preserve subpixel antialiasing */
+            margin-bottom: 40px;
         }
 
         .chart-header {
@@ -436,9 +515,63 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
+        /* Dark Mode: Tinted style for less contrast */
+        [data-theme="dark"] .segment-btn.active {
+            background: rgba(0, 242, 255, 0.15);
+            color: var(--accent-primary);
+            border: 1px solid rgba(0, 242, 255, 0.3);
+            box-shadow: 0 0 10px rgba(0, 242, 255, 0.1);
+        }
+
         .segment-btn:not(.active):hover {
             background: rgba(255, 255, 255, 0.05);
             color: var(--text-main);
+        }
+
+        .btn-share {
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--glow);
+            transition: all 0.2s ease;
+            font-family: inherit;
+            font-weight: 500;
+        }
+
+        .btn-share:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        /* Dark Mode: Glassy gradient for Share button */
+        [data-theme="dark"] .btn-share {
+            background: linear-gradient(135deg, rgba(0, 242, 255, 0.1), rgba(112, 0, 255, 0.1));
+            border: 1px solid var(--glass-border);
+            color: var(--accent-primary);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.05);
+        }
+
+        [data-theme="dark"] .btn-share:hover {
+            border-color: var(--accent-primary);
+            background: linear-gradient(135deg, rgba(0, 242, 255, 0.2), rgba(112, 0, 255, 0.2));
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
+        }
+
+        /* Chart Focus Mode */
+        .chart-wrapper.focus-mode canvas {
+            filter: grayscale(0.5) opacity(0.5);
+            transition: filter 0.3s ease;
+        }
+
+        .chart-wrapper.focus-mode canvas:hover {
+            filter: grayscale(0) opacity(1);
         }
 
         /* Custom Legend Styling */
@@ -1156,6 +1289,11 @@
                     <div class="theme-switch-thumb"></div>
                 </div>
             </div>
+            <div class="market-status-pill"
+                style="display: flex; align-items: center; gap: 8px; margin-bottom: 20px; background: rgba(0, 242, 255, 0.1); padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(0, 242, 255, 0.2); font-size: 0.75rem; font-weight: 700; color: var(--accent-primary); letter-spacing: 0.5px;">
+                <span class="market-indicator open"></span>
+                LIVE EXPERIMENT
+            </div>
             <h1>AI Portfolio Experiment</h1>
             <p class="subtitle">
                 Comparing four $1,000 investment portfolios managed by AI.
@@ -1225,15 +1363,14 @@
                             onclick="setYScale('dynamic')">Dynamic</button>
                         <button class="segment-btn" data-scale="zero" onclick="setYScale('zero')">From $0</button>
                     </div>
-                    <button id="downloadBtn" class="custom-file-upload"
-                        style="padding: 8px 16px; border-radius: 8px; background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-main); cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+                    <button id="downloadBtn" onclick="takeSnapshot()" class="custom-file-upload btn-share">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                             <polyline points="7 10 12 15 17 10" />
                             <line x1="12" x2="12" y1="15" y2="3" />
                         </svg>
-                        Export PNG
+                        Share Snapshot
                     </button>
                 </div>
             </div>
@@ -1519,12 +1656,12 @@
         function getThemeColors() {
             const isLight = document.documentElement.getAttribute('data-theme') === 'light';
             return {
-                text: isLight ? '#656d76' : '#8b949e',
-                grid: isLight ? 'rgba(31, 35, 40, 0.05)' : 'rgba(255, 255, 255, 0.05)',
-                tooltipBg: isLight ? '#ffffff' : '#161b22',
-                tooltipBorder: isLight ? 'rgba(31, 35, 40, 0.1)' : 'rgba(255, 255, 255, 0.1)',
-                tooltipText: isLight ? '#1f2328' : '#c9d1d9',
-                chartBg: isLight ? '#ffffff' : '#161b22'
+                text: isLight ? '#64748b' : '#9198a1',
+                grid: isLight ? 'rgba(0, 0, 0, 0.02)' : 'rgba(255, 255, 255, 0.03)',
+                tooltipBg: isLight ? 'rgba(255, 255, 255, 0.95)' : 'rgba(13, 17, 23, 0.95)',
+                tooltipBorder: isLight ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.08)',
+                tooltipText: isLight ? '#0f172a' : '#e6edf3',
+                chartBg: 'transparent'
             };
         }
 
@@ -1576,16 +1713,16 @@
                 }
             };
 
-            // Plugin for Line Glow and Shadow (The "2026 Look")
+            // Plugin for Line Glow and Shadow (Enhanced 2026 Look)
             const glowPlugin = {
                 id: 'glow',
                 beforeDatasetDraw: (chart, args) => {
                     const { ctx } = chart;
                     ctx.save();
-                    ctx.shadowBlur = 12;
+                    ctx.shadowBlur = 20;
                     ctx.shadowColor = args.meta.dataset.options.borderColor;
                     ctx.shadowOffsetX = 0;
-                    ctx.shadowOffsetY = 4;
+                    ctx.shadowOffsetY = 0;
                 },
                 afterDatasetDraw: (chart) => {
                     chart.ctx.restore();
@@ -1636,10 +1773,11 @@
                             ticks: {
                                 color: theme.text,
                                 padding: 12,
+                                padding: 12,
                                 font: {
-                                    family: 'Outfit, sans-serif',
+                                    family: 'JetBrains Mono, monospace',
                                     size: 11,
-                                    weight: '600'
+                                    weight: '500'
                                 },
                                 callback: value => '$' + value.toLocaleString()
                             }
@@ -1650,9 +1788,9 @@
                                 color: theme.text,
                                 padding: 10,
                                 font: {
-                                    family: 'Outfit, sans-serif',
+                                    family: 'JetBrains Mono, monospace',
                                     size: 11,
-                                    weight: '600'
+                                    weight: '500'
                                 }
                             }
                         }
@@ -1660,32 +1798,8 @@
                     plugins: {
                         legend: { display: false },
                         tooltip: {
-                            enabled: true,
-                            position: 'nearest',
-                            backgroundColor: theme.tooltipBg === '#ffffff' ? 'rgba(255, 255, 255, 0.95)' : 'rgba(22, 27, 34, 0.95)',
-                            titleColor: theme.tooltipText,
-                            bodyColor: theme.tooltipText,
-                            borderColor: theme.tooltipBorder,
-                            borderWidth: 1,
-                            padding: 16,
-                            cornerRadius: 12,
-                            boxPadding: 8,
-                            usePointStyle: true,
-                            bodyFont: {
-                                family: 'Outfit, sans-serif',
-                                size: 13
-                            },
-                            titleFont: {
-                                family: 'Outfit, sans-serif',
-                                size: 14,
-                                weight: '700'
-                            },
-                            callbacks: {
-                                label: function (context) {
-                                    const val = context.parsed.y.toLocaleString(undefined, { minimumFractionDigits: 2 });
-                                    return ` ${context.dataset.label}: $${val}`;
-                                }
-                            }
+                            enabled: false, // Use external tooltips
+                            external: externalTooltipHandler
                         },
                         customCanvasBackground: {
                             color: theme.chartBg
@@ -1697,6 +1811,65 @@
             generateCustomLegend(chart);
         }
 
+        // External Tooltip Handler (The "2026 Modern" Way)
+        function externalTooltipHandler(context) {
+            // Tooltip Element
+            let tooltipEl = document.getElementById('chartjs-tooltip');
+
+            // Create element on first render
+            if (!tooltipEl) {
+                tooltipEl = document.createElement('div');
+                tooltipEl.id = 'chartjs-tooltip';
+                tooltipEl.style.background = 'var(--glass-bg)';
+                tooltipEl.style.backdropFilter = 'blur(20px)';
+                tooltipEl.style.borderRadius = '16px';
+                tooltipEl.style.border = '1px solid var(--glass-border)';
+                tooltipEl.style.color = 'var(--text-main)';
+                tooltipEl.style.opacity = 1;
+                tooltipEl.style.pointerEvents = 'none';
+                tooltipEl.style.position = 'absolute';
+                tooltipEl.style.transition = 'all .1s ease';
+                tooltipEl.style.zIndex = 100;
+                tooltipEl.style.padding = '12px 16px';
+                tooltipEl.style.boxShadow = 'var(--shadow)';
+                document.body.appendChild(tooltipEl);
+            }
+
+            // Hide if no tooltip
+            const tooltipModel = context.tooltip;
+            if (tooltipModel.opacity === 0) {
+                tooltipEl.style.opacity = 0;
+                return;
+            }
+
+            // Set Text
+            if (tooltipModel.body) {
+                const titleLines = tooltipModel.title || [];
+                const bodyLines = tooltipModel.body.map(item => item.lines);
+
+                let innerHtml = '<div style="font-weight: 700; margin-bottom: 8px; font-size: 0.9rem;">' + titleLines[0] + '</div>';
+                innerHtml += '<div style="display: flex; flex-direction: column; gap: 4px;">';
+
+                bodyLines.forEach((body, i) => {
+                    const colors = tooltipModel.labelColors[i];
+                    const span = `<span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:${colors.borderColor}; margin-right:8px;"></span>`;
+                    innerHtml += `<div style="display: flex; align-items: center; font-size: 0.85rem;">${span}${body}</div>`;
+                });
+                innerHtml += '</div>';
+
+                tooltipEl.innerHTML = innerHtml;
+            }
+
+            const canvas = context.chart.canvas;
+            const rect = canvas.getBoundingClientRect();
+
+            // Display, position, and set styles for font
+            tooltipEl.style.opacity = 1;
+            tooltipEl.style.left = rect.left + window.scrollX + tooltipModel.caretX + 'px';
+            tooltipEl.style.top = rect.top + window.scrollY + tooltipModel.caretY + 'px';
+            tooltipEl.style.fontFamily = 'Outfit, sans-serif';
+        }
+
         function generateCustomLegend(chartInstance) {
             const legendContainer = document.getElementById('chartLegend');
             legendContainer.innerHTML = '';
@@ -1704,6 +1877,32 @@
             chartInstance.data.datasets.forEach((dataset, i) => {
                 const item = document.createElement('div');
                 item.className = 'legend-item';
+
+                // Focusing Interaction
+                item.onmouseenter = () => {
+                    document.querySelector('.chart-wrapper').classList.add('focus-mode');
+                    chartInstance.data.datasets.forEach((ds, idx) => {
+                        if (idx !== i) {
+                            ds.borderColor = colors[ds.label] + '22';
+                            ds.backgroundColor = 'transparent';
+                        }
+                    });
+                    chartInstance.update('none');
+                };
+
+                item.onmouseleave = () => {
+                    document.querySelector('.chart-wrapper').classList.remove('focus-mode');
+                    chartInstance.data.datasets.forEach((ds, idx) => {
+                        ds.borderColor = colors[ds.label];
+                        // Re-create gradient
+                        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+                        gradient.addColorStop(0, colors[ds.label] + '44');
+                        gradient.addColorStop(1, colors[ds.label] + '00');
+                        ds.backgroundColor = gradient;
+                    });
+                    chartInstance.update('none');
+                };
+
                 item.onclick = () => {
                     const isVisible = chartInstance.isDatasetVisible(i);
                     chartInstance.setDatasetVisibility(i, !isVisible);
@@ -1726,8 +1925,6 @@
 
         function updateStats(lastRow) {
             const grid = document.getElementById('statsGrid');
-            grid.innerHTML = '';
-
             const models = ['ChatGPT', 'Gemini', 'Claude', 'Perplexity'];
 
             // Calculate rankings
@@ -1741,80 +1938,117 @@
                 rankMap[item.model] = index + 1;
             });
 
-            const rankBadges = ['#1', '#2', '#3', '#4'];
-            const leader = rankings[0];
-            const leadAmount = leader.value - rankings[1].value;
-
-            // Store leader info for Twitter sharing
-            window.leaderInfo = {
-                name: leader.model,
-                value: leader.value,
-                change: ((leader.value - initialCapital) / initialCapital * 100).toFixed(1)
-            };
-
+            grid.innerHTML = '';
             models.forEach(model => {
-                const value = lastRow[model] || 0;
-                const changePcnt = ((value - initialCapital) / initialCapital * 100).toFixed(2);
-                const isPlus = changePcnt >= 0;
+                const val = lastRow[model] || 0;
+                const change = ((val - initialCapital) / initialCapital * 100).toFixed(2);
+                const isPositive = change >= 0;
                 const rank = rankMap[model];
                 const isLeader = rank === 1;
 
                 const card = document.createElement('div');
-                card.className = 'stat-card' + (isLeader ? ' leader' : '');
-
-                let leaderLabel = '';
-                if (isLeader && leadAmount > 0) {
-                    leaderLabel = `<div class="leader-label">Leads by $${leadAmount.toFixed(2)}</div>`;
-                }
+                card.className = `stat-card ${isLeader ? 'leader' : ''}`;
+                card.style.animationDelay = `${models.indexOf(model) * 0.1}s`;
 
                 card.innerHTML = `
-                    <div class="glass-isolation-layer"></div>
-                    <span class="rank-badge rank-${rank}">${rankBadges[rank - 1]}</span>
-                    <h3>${model}</h3>
-                    <div style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 8px;">${modelVersions[model]}</div>
-                    <div class="value" data-target="${value}">$${initialCapital.toFixed(2)}</div>
-                    <div class="change ${isPlus ? 'plus' : 'minus'}">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 2px; vertical-align: middle;">
-                        ${isPlus ? '<polyline points="18 15 12 9 6 15"/>' : '<polyline points="6 9 12 15 18 9"/>'}
-                    </svg>
-                    ${Math.abs(changePcnt)}% total return
-                </div>
-                    ${leaderLabel}
+                    <div class="rank-badge rank-${rank}">${rank}</div>
+                    <div class="model-name" style="color: ${colors[model]}; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">
+                        ${modelVersions[model]}
+                    </div>
+                    <div class="value" data-target="${val}">$${initialCapital.toLocaleString()}</div>
+                    <div class="change ${isPositive ? 'plus' : 'minus'}">
+                        ${isPositive ? '▲' : '▼'} ${Math.abs(change)}%
+                    </div>
+                    ${isLeader ? '<div class="leader-label">🏆 PERFORMANCE LEADER</div>' : ''}
                 `;
                 grid.appendChild(card);
             });
 
-            // Animate counters
+            // Trigger Counter Animation
             animateCounters();
         }
 
         function animateCounters() {
             const counters = document.querySelectorAll('.value[data-target]');
-            const duration = 1500;
-            const startTime = performance.now();
+            counters.forEach(counter => {
+                const target = parseFloat(counter.getAttribute('data-target'));
+                const duration = 2000; // 2 seconds
+                const startTime = performance.now();
+                const startValue = initialCapital;
 
-            function update(currentTime) {
-                const elapsed = currentTime - startTime;
-                const progress = Math.min(elapsed / duration, 1);
+                function updateCounter(currentTime) {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
 
-                // Easing function (ease-out-cubic)
-                const easeProgress = 1 - Math.pow(1 - progress, 3);
+                    // Easing function: easeOutExpo
+                    const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
 
-                counters.forEach(counter => {
-                    const target = parseFloat(counter.dataset.target);
-                    const current = initialCapital + (target - initialCapital) * easeProgress;
-                    counter.textContent = '$' + current.toLocaleString(undefined, {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
-                    });
-                });
+                    const currentValue = startValue + (target - startValue) * easeProgress;
+                    counter.textContent = `$${currentValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-                if (progress < 1) {
-                    requestAnimationFrame(update);
+                    if (progress < 1) {
+                        requestAnimationFrame(updateCounter);
+                    }
                 }
-            }
+                requestAnimationFrame(updateCounter);
+            });
+        }
 
-            requestAnimationFrame(update);
+        // Snapshot Function (The "Viral" Image Exporter)
+        function takeSnapshot() {
+            const canvas = document.getElementById('performanceChart');
+            const tempCanvas = document.createElement('canvas');
+            const tCtx = tempCanvas.getContext('2d');
+
+            // Set dimensions for high-quality export
+            tempCanvas.width = 1200;
+            tempCanvas.height = 800;
+
+            // 1. Draw Background
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            tCtx.fillStyle = isDark ? '#05070a' : '#f8fafc';
+            tCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+            // Add subtle mesh gradient circles to export
+            tCtx.globalAlpha = 0.1;
+            const grad1 = tCtx.createRadialGradient(0, 0, 0, 0, 0, 800);
+            grad1.addColorStop(0, '#00f2ff');
+            grad1.addColorStop(1, 'transparent');
+            tCtx.fillStyle = grad1;
+            tCtx.beginPath();
+            tCtx.arc(0, 0, 800, 0, Math.PI * 2);
+            tCtx.fill();
+
+            tCtx.globalAlpha = 1.0;
+
+            // 2. Draw Header Branding
+            tCtx.fillStyle = isDark ? '#ffffff' : '#0f172a';
+            tCtx.font = '700 40px Outfit, sans-serif';
+            tCtx.fillText('AI PORTFOLIO EXPERIMENT', 60, 100);
+
+            tCtx.font = '400 20px Outfit, sans-serif';
+            tCtx.fillStyle = isDark ? '#9198a1' : '#64748b';
+            tCtx.fillText('Comparing 4 AI Models with $1,000 each', 60, 140);
+
+            // 3. Draw the Chart
+            // We use the original canvas but scaled to fit
+            const chartImage = new Image();
+            chartImage.src = canvas.toDataURL('image/png');
+            chartImage.onload = function () {
+                tCtx.drawImage(chartImage, 60, 200, 1080, 500);
+
+                // 4. Branding Footer
+                tCtx.fillStyle = isDark ? '#ffffff' : '#0f172a';
+                tCtx.font = '600 16px Outfit, sans-serif';
+                tCtx.textAlign = 'right';
+                tCtx.fillText('seve1995.github.io/ai-portfolio-experiment', 1140, 750);
+
+                // Trigger Download
+                const link = document.createElement('a');
+                link.download = `AI-Portfolio-Snapshot-${new Date().toISOString().split('T')[0]}.png`;
+                link.href = tempCanvas.toDataURL('image/png', 1.0);
+                link.click();
+            };
         }
 
         // Twitter share function
@@ -1826,7 +2060,7 @@
             const leader = window.leaderInfo || { name: 'AI', change: '0' };
             const sign = parseFloat(leader.change) >= 0 ? '+' : '';
 
-            const tweetText = `Day ${dayNumber} of the AI Portfolio Experiment: ${leader.name} leads with ${sign}${leader.change}% performance.\n\nWho will win the challenge?\n\nhttps://seve1995.github.io/ai-portfolio-experiment/\n\n#AI #Investing #FinTech`;
+            const tweetText = `Day ${dayNumber} of the AI Portfolio Experiment: ${leader.name} leads with ${sign}${leader.change}% performance. 📈\n\nWho will win the ultimate AI challenge?\n\nhttps://seve1995.github.io/ai-portfolio-experiment/\n\n#AI #Investing #ChatGPT #Gemini #Claude #Perplexity`;
 
             const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
             window.open(tweetUrl, '_blank', 'width=550,height=420');
