@@ -189,49 +189,49 @@
   },
   "2026-01-09": {
     "ChatGPT": {
-      "equity": 943.9,
-      "cash": 851.44,
-      "buying_power": 665.5,
+      "equity": 944.2,
+      "cash": 839.55,
+      "buying_power": 758.62,
       "positions": [
         {
-          "ticker": "AQST",
-          "qty": 23.0,
-          "avg_cost": 6.45,
-          "current_price": 4.02,
-          "market_value": 92.46,
-          "unrealized_pl": -55.89,
-          "unrealized_pl_pct": -37.67441860465116,
+          "ticker": "NVAX",
+          "qty": 14.0,
+          "avg_cost": 7.44,
+          "current_price": 7.475,
+          "market_value": 104.65,
+          "unrealized_pl": 0.49,
+          "unrealized_pl_pct": 0.47043010752688,
           "sector": "Healthcare",
-          "industry": "Drug Manufacturers - Specialty & Generic"
+          "industry": "Biotechnology"
         }
       ]
     },
     "Gemini": {
-      "equity": 998.96,
-      "cash": 998.96,
-      "buying_power": 600.29,
-      "positions": []
-    },
-    "Claude": {
-      "equity": 917.48,
-      "cash": 768.74,
-      "buying_power": 768.74,
+      "equity": 998.0,
+      "cash": 798.56,
+      "buying_power": 600.3,
       "positions": [
         {
-          "ticker": "AQST",
-          "qty": 37.0,
-          "avg_cost": 6.25,
-          "current_price": 4.02,
-          "market_value": 148.74,
-          "unrealized_pl": -82.51,
-          "unrealized_pl_pct": -35.68,
-          "sector": "Healthcare",
-          "industry": "Drug Manufacturers - Specialty & Generic"
+          "ticker": "UPST",
+          "qty": 4.0,
+          "avg_cost": 50.1,
+          "current_price": 49.86,
+          "market_value": 199.44,
+          "unrealized_pl": -0.96,
+          "unrealized_pl_pct": -0.47904191616766,
+          "sector": "Financial Services",
+          "industry": "Credit Services"
         }
       ]
     },
+    "Claude": {
+      "equity": 917.8,
+      "cash": 917.8,
+      "buying_power": 917.8,
+      "positions": []
+    },
     "Perplexity": {
-      "equity": 1011.87,
+      "equity": 1017.66,
       "cash": 913.17,
       "buying_power": 913.17,
       "positions": [
@@ -239,10 +239,10 @@
           "ticker": "APLD",
           "qty": 3.0,
           "avg_cost": 28.94,
-          "current_price": 32.9,
-          "market_value": 98.7,
-          "unrealized_pl": 11.88,
-          "unrealized_pl_pct": 13.68348306841742,
+          "current_price": 34.83,
+          "market_value": 104.49,
+          "unrealized_pl": 17.67,
+          "unrealized_pl_pct": 20.35245335176227,
           "sector": "Technology",
           "industry": "Information Technology Services"
         }
