@@ -143,6 +143,15 @@
   "Perplexity": [
     {
       "symbol": "APLD",
+      "side": "sell",
+      "qty": 3.0,
+      "price": 36.88,
+      "timestamp": "2026-01-09T16:50:19.327151+00:00",
+      "type": "limit",
+      "id": "1b7a20ed-2fdd-43c9-8821-6b9f02866854"
+    },
+    {
+      "symbol": "APLD",
       "side": "buy",
       "qty": 3.0,
       "price": 28.94,
