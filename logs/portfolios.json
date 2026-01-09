@@ -189,7 +189,7 @@
   },
   "2026-01-09": {
     "ChatGPT": {
-      "equity": 940.49,
+      "equity": 940.07,
       "cash": 758.63,
       "buying_power": 758.63,
       "positions": [
@@ -197,10 +197,10 @@
           "ticker": "NVAX",
           "qty": 14.0,
           "avg_cost": 7.44,
-          "current_price": 7.365,
-          "market_value": 103.11,
-          "unrealized_pl": -1.05,
-          "unrealized_pl_pct": -1.00806451612903,
+          "current_price": 7.355,
+          "market_value": 102.97,
+          "unrealized_pl": -1.19,
+          "unrealized_pl_pct": -1.14247311827957,
           "sector": "Healthcare",
           "industry": "Biotechnology"
         },
@@ -208,28 +208,39 @@
           "ticker": "UAA",
           "qty": 14.0,
           "avg_cost": 5.78,
-          "current_price": 5.625,
-          "market_value": 78.75,
-          "unrealized_pl": -2.17,
-          "unrealized_pl_pct": -2.68166089965398,
+          "current_price": 5.605,
+          "market_value": 78.47,
+          "unrealized_pl": -2.45,
+          "unrealized_pl_pct": -3.02768166089965,
           "sector": "Consumer Cyclical",
           "industry": "Apparel Manufacturing"
         }
       ]
     },
     "Gemini": {
-      "equity": 996.54,
-      "cash": 798.56,
+      "equity": 996.27,
+      "cash": 783.31,
       "buying_power": 600.3,
       "positions": [
+        {
+          "ticker": "RIOT",
+          "qty": 1.0,
+          "avg_cost": 15.25,
+          "current_price": 15.28,
+          "market_value": 15.28,
+          "unrealized_pl": 0.03,
+          "unrealized_pl_pct": 0.19672131147541,
+          "sector": "Financial Services",
+          "industry": "Capital Markets"
+        },
         {
           "ticker": "UPST",
           "qty": 4.0,
           "avg_cost": 50.1,
-          "current_price": 49.495,
-          "market_value": 197.98,
-          "unrealized_pl": -2.42,
-          "unrealized_pl_pct": -1.20758483033932,
+          "current_price": 49.42,
+          "market_value": 197.68,
+          "unrealized_pl": -2.72,
+          "unrealized_pl_pct": -1.35728542914172,
           "sector": "Financial Services",
           "industry": "Credit Services"
         }
