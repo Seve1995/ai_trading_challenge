@@ -19,6 +19,15 @@
       "id": "569eae5d-5072-4e96-b6f6-1d6a94b74266"
     },
     {
+      "symbol": "UAA",
+      "side": "buy",
+      "qty": 14.0,
+      "price": 5.78,
+      "timestamp": "2026-01-09T15:03:17.200752+00:00",
+      "type": "limit",
+      "id": "596b932a-33d7-4b91-ba0f-fda7e2f3ac77"
+    },
+    {
       "symbol": "RIVN",
       "side": "sell",
       "qty": 18.0,
