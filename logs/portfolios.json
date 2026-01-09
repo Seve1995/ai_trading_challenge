@@ -186,5 +186,67 @@
         }
       ]
     }
+  },
+  "2026-01-09": {
+    "ChatGPT": {
+      "equity": 943.9,
+      "cash": 851.44,
+      "buying_power": 665.5,
+      "positions": [
+        {
+          "ticker": "AQST",
+          "qty": 23.0,
+          "avg_cost": 6.45,
+          "current_price": 4.02,
+          "market_value": 92.46,
+          "unrealized_pl": -55.89,
+          "unrealized_pl_pct": -37.67441860465116,
+          "sector": "Healthcare",
+          "industry": "Drug Manufacturers - Specialty & Generic"
+        }
+      ]
+    },
+    "Gemini": {
+      "equity": 998.96,
+      "cash": 998.96,
+      "buying_power": 600.29,
+      "positions": []
+    },
+    "Claude": {
+      "equity": 917.48,
+      "cash": 768.74,
+      "buying_power": 768.74,
+      "positions": [
+        {
+          "ticker": "AQST",
+          "qty": 37.0,
+          "avg_cost": 6.25,
+          "current_price": 4.02,
+          "market_value": 148.74,
+          "unrealized_pl": -82.51,
+          "unrealized_pl_pct": -35.68,
+          "sector": "Healthcare",
+          "industry": "Drug Manufacturers - Specialty & Generic"
+        }
+      ]
+    },
+    "Perplexity": {
+      "equity": 1011.87,
+      "cash": 913.17,
+      "buying_power": 913.17,
+      "positions": [
+        {
+          "ticker": "APLD",
+          "qty": 3.0,
+          "avg_cost": 28.94,
+          "current_price": 32.9,
+          "market_value": 98.7,
+          "unrealized_pl": 11.88,
+          "unrealized_pl_pct": 13.68348306841742,
+          "sector": "Technology",
+          "industry": "Information Technology Services"
+        }
+      ]
+    }
   }
 }
