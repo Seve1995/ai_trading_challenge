@@ -282,20 +282,21 @@ ORDER:
 - If numbers are uncertain → NO BUY
 
 ------------------------------------------------------------
-## PHASE 4 — EXECUTION TABLE
+## PHASE 4 — EXECUTION TABLE (STRICT FORMAT)
 
 | ACTION | TICKER | QTY | TYPE | LIMIT_PRICE | STOP_LOSS | TAKE_PROFIT | REASON |
 | :--- | :--- | :---: | :--- | :---: | :---: | :---: | :--- |
 
-Rules:
-- ACTION: BUY, SELL, HOLD, CANCEL, NO_TRADES
-- SELL: MARKET, prices = 0.00
-- BUY: LIMIT, numeric prices
-- HOLD: TYPE=N/A, TAKE_PROFIT=N/A
-- CANCEL: TYPE=N/A, all prices = N/A (cancels all open orders for ticker)
-- Do NOT buy tickers already held
+RULES FOR NUMERIC COLUMNS (STRICT):
+1. **QTY**: Must be a clean whole integer.
+2. **PRICES** (LIMIT_PRICE, STOP_LOSS, TAKE_PROFIT): Must be RAW NUMBERS ONLY.
+3. **NO SYMBOLS**: Do NOT include '$' or ',' in the table.
+4. **NO TEXT**: Do NOT add explanatory text (like "@ $7.85") inside numeric columns.
+5. **N/A**: Use 'N/A' for any field that is unknown or not applicable.
 
-If no actions:
+ACTION VALUES: BUY, SELL, HOLD, CANCEL, NO_TRADES
+
+If no actions are taken, use:
 | NO_TRADES | N/A | N/A | N/A | N/A | N/A | N/A | Macro blocked / No valid setups |
 """
 

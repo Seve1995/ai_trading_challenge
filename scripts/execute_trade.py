@@ -35,20 +35,21 @@ def log_execution(msg):
 HEADER_MAP = {
     "TICKER": ["TICKER", "TICK", "SYMBOL"],
     "ACTION": ["ACTION", "ACT"],
-    "QTY": ["QTY", "QUANTITY", "AMOUNT", "SIZE"],
+    "QTY": ["QTY", "QUANTITY", "AMOUNT", "SIZE", "SHARES"],
     "TYPE": ["TYPE", "ORDER TYPE"],
     "LIMIT_PRICE": ["LIMIT_PRICE", "LIMIT PRICE", "LIMIT", "PRICE"],
-    "STOP_LOSS": ["STOP_LOSS", "STOP LOSS", "STOP", "SL"],
+    "STOP_LOSS": ["STOP_LOSS", "STOP LOSS", "STOP", "SL", "RISK MANAGEMENT", "RISK"],
     "TAKE_PROFIT": ["TAKE_PROFIT", "TAKE PROFIT", "TP", "TARGET"],
     # Optional / ignored by executor if present
     "REASON": ["REASON", "WHY", "RATIONALE"],
 }
 
 
-def clean_val(val):
+def clean_val(val, is_numeric=False):
     """
     Normalizes values coming from clipboard parsing.
     Returns None for empty/N/A fields.
+    If is_numeric is True, attempts to extract the first valid decimal number.
     """
     if val is None:
         return None
@@ -56,6 +57,18 @@ def clean_val(val):
     s_up = s.upper().replace("$", "").replace(",", "").strip()
     if s_up in ["N/A", "NONE", "", "-"]:
         return None
+    
+    if is_numeric:
+        # 1. Try to find a number preceded by a $ sign (e.g., "$7.85")
+        dollar_match = re.search(r"\$\s*(-?\d*\.?\d+)", s_up)
+        if dollar_match:
+            return dollar_match.group(1)
+            
+        # 2. Fallback: Extract the first number found in the string
+        match = re.search(r"(-?\d*\.?\d+)", s_up)
+        if match:
+            return match.group(1)
+            
     return s_up
 
 
@@ -76,6 +89,20 @@ def map_headers(row_keys):
     return mapped
 
 
+def get_active_orders(ticker=None):
+    """
+    Fetches orders that are currently 'active' in Alpaca.
+    Includes 'held' orders which are often legs of bracket/OCO orders.
+    """
+    params = {"status": "all", "limit": 100}
+    if ticker:
+        params["symbols"] = [ticker]
+    
+    all_orders = api.list_orders(**params)
+    active_statuses = {"new", "accepted", "partially_filled", "pending_new", "held"}
+    return [o for o in all_orders if o.status in active_statuses]
+
+
 def print_preflight_status():
     """Print current account status, positions, and open orders before starting."""
     log_execution("\n" + "=" * 50)
@@ -84,11 +111,7 @@ def print_preflight_status():
     try:
         account = api.get_account()
         positions = api.list_positions()
-        # Fetch ALL orders to include 'held' (bracket OCO legs)
-        all_orders = api.list_orders(status="all", limit=50)
-        # Filter for active orders (new, accepted, partially_filled, held)
-        active_statuses = {"new", "accepted", "partially_filled", "pending_new", "held"}
-        orders = [o for o in all_orders if o.status in active_statuses]
+        orders = get_active_orders()
 
         log_execution(f"💰 Equity: ${float(account.equity):,.2f}")
         log_execution(f"💸 Buying Power: ${float(account.buying_power):,.2f}")
@@ -163,9 +186,6 @@ def parse_clipboard_trades():
             for row in reader:
                 trade = {canonical: row.get(original) for canonical, original in h_map.items()}
                 if trade.get("ACTION") and trade.get("TICKER"):
-                    if clean_val(trade.get("ACTION")) == "NO_TRADES":
-                        # Skip NO_TRADES rows but continue processing other rows
-                        continue
                     trades.append(trade)
 
         if trades:
@@ -199,9 +219,6 @@ def parse_clipboard_trades():
             for row in reader:
                 trade = {canonical: row.get(original) for canonical, original in h_map.items()}
                 if trade.get("ACTION") and trade.get("TICKER"):
-                    if clean_val(trade.get("ACTION")) == "NO_TRADES":
-                        # Skip NO_TRADES rows but continue processing other rows
-                        continue
                     trades.append(trade)
 
     if trades:
@@ -243,10 +260,7 @@ def manage_hold_protection(ticker, stop_loss_price, dry_run=False):
 
     log_execution(f"\n🛡️ SYNCING PROTECTION: {ticker} (Target Stop: ${stop_loss_price:.2f})")
 
-    # Fetch ALL orders to find 'held' stop orders (part of brackets)
-    all_orders = api.list_orders(status="all", symbols=[ticker])
-    active_statuses = {"new", "accepted", "partially_filled", "pending_new", "held"}
-    open_orders = [o for o in all_orders if o.status in active_statuses]
+    open_orders = get_active_orders(ticker)
 
     # Manage existing STOP sell orders (including 'held' ones from brackets)
     stop_orders = [o for o in open_orders if o.side == "sell" and o.type == "stop"]
@@ -320,17 +334,17 @@ def manage_hold_protection(ticker, stop_loss_price, dry_run=False):
 def execute_trade(trade, dry_run=False):
     action = clean_val(trade.get("ACTION"))
     ticker = clean_val(trade.get("TICKER"))
-    qty_str = clean_val(trade.get("QTY"))
-    limit_price_str = clean_val(trade.get("LIMIT_PRICE"))
-    stop_loss_str = clean_val(trade.get("STOP_LOSS"))
-    take_profit_str = clean_val(trade.get("TAKE_PROFIT"))
+    qty_str = clean_val(trade.get("QTY"), is_numeric=True)
+    limit_price_str = clean_val(trade.get("LIMIT_PRICE"), is_numeric=True)
+    stop_loss_str = clean_val(trade.get("STOP_LOSS"), is_numeric=True)
+    take_profit_str = clean_val(trade.get("TAKE_PROFIT"), is_numeric=True)
 
     if not action:
         return
 
-    # Ignore NO_TRADES if it slips through
+    # Acknowledge NO_TRADES if it slips through
     if action == "NO_TRADES":
-        log_execution("🛑 NO_TRADES row encountered. Skipping.")
+        log_execution(f"� NO_TRADES: AI explicitly decided to stay flat today ({ticker}).")
         return
 
     if action == "HOLD":
@@ -348,31 +362,37 @@ def execute_trade(trade, dry_run=False):
     if action == "CANCEL":
         log_execution(f"\n🚫 PROCESSING CANCEL: {ticker}")
         try:
-            open_orders = api.list_orders(status="open", symbols=[ticker])
-            if not open_orders:
-                log_execution(f"   ⚠️ No open orders found for {ticker}. Nothing to cancel.")
+            active_orders = get_active_orders(ticker)
+            if not active_orders:
+                log_execution(f"   ⚠️ No active orders found for {ticker}. Nothing to cancel.")
                 return
 
-            log_execution(f"   🧹 Cancelling {len(open_orders)} open order(s) for {ticker}...")
-            for o in open_orders:
+            log_execution(f"   🧹 Cancelling {len(active_orders)} active order(s) for {ticker}...")
+            for o in active_orders:
                 if dry_run:
                     price_str = (
                         f"@ ${float(o.limit_price):.2f}" if o.limit_price
                         else (f"Stop @ ${float(o.stop_price):.2f}" if o.stop_price else "MARKET")
                     )
-                    log_execution(f"   [DRY RUN] Would cancel {o.side.upper()} {o.type.upper()} order {price_str}")
+                    status_label = "OCO-held" if o.status == "held" else o.status
+                    log_execution(f"   [DRY RUN] Would cancel {o.side.upper()} {o.type.upper()} order {price_str} ({status_label})")
                 else:
                     api.cancel_order(o.id)
                     log_execution(f"   ✅ Cancelled order {o.id}")
 
             if not dry_run:
-                # Wait for cancellations to process
-                time.sleep(1)
-                remaining = api.list_orders(status="open", symbols=[ticker])
-                if remaining:
-                    log_execution(f"   ⚠️ {len(remaining)} order(s) still pending cancellation for {ticker}.")
-                else:
-                    log_execution(f"   ✅ All orders for {ticker} successfully cancelled.")
+                # Polling loop: Wait up to 5 seconds for orders to clear
+                attempts = 0
+                while attempts < 5:
+                    time.sleep(1)
+                    remaining = get_active_orders(ticker)
+                    if not remaining:
+                        log_execution(f"   ✅ All orders for {ticker} successfully cancelled.")
+                        return
+                    attempts += 1
+                    log_execution(f"   ⏳ Waiting for cancellations to process ({attempts}/5)...")
+                
+                log_execution(f"   ⚠️ {len(remaining)} order(s) still pending cancellation for {ticker}.")
         except Exception as e:
             log_execution(f"   ❌ CANCEL FAILED: {e}")
         return
@@ -381,11 +401,11 @@ def execute_trade(trade, dry_run=False):
         if action == "SELL":
             log_execution(f"\n📉 PROCESSING SELL: {ticker}")
             try:
-                # --- NEW: Clear any open orders for this ticker first ---
-                open_orders = api.list_orders(status="open", symbols=[ticker])
-                if open_orders:
-                    log_execution(f"   🧹 Clearing {len(open_orders)} open order(s) for {ticker} before selling.")
-                    for o in open_orders:
+                # --- NEW: Clear any active orders for this ticker first ---
+                active_orders = get_active_orders(ticker)
+                if active_orders:
+                    log_execution(f"   🧹 Clearing {len(active_orders)} active order(s) for {ticker} before selling.")
+                    for o in active_orders:
                         if not dry_run:
                             api.cancel_order(o.id)
                         else:
@@ -396,7 +416,7 @@ def execute_trade(trade, dry_run=False):
                         attempts = 0
                         while attempts < 10:
                             time.sleep(1)
-                            remaining = api.list_orders(status="open", symbols=[ticker])
+                            remaining = get_active_orders(ticker)
                             if not remaining:
                                 break
                             attempts += 1
@@ -454,10 +474,10 @@ def execute_trade(trade, dry_run=False):
                 pass
 
             # --- CHECK 3: Open Buy Order (Idempotency) ---
-            open_orders = api.list_orders(status="open", symbols=[ticker])
-            buy_orders = [o for o in open_orders if o.side == "buy"]
+            active_orders = get_active_orders(ticker)
+            buy_orders = [o for o in active_orders if o.side == "buy"]
             if buy_orders:
-                log_execution(f"   ⚠️ Pending Order: There is already an open BUY order for {ticker}. Skipping duplicates.")
+                log_execution(f"   ⚠️ Pending Order: There is already an active BUY order for {ticker}. Skipping duplicates.")
                 return
 
             qty = int(qty_str) if qty_str else 0
