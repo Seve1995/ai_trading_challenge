@@ -2118,6 +2118,12 @@
                 grid.appendChild(card);
             });
 
+            // Store rankings globally for share functionality
+            window.allRankings = rankings.map(item => {
+                const change = ((item.value - initialCapital) / initialCapital * 100).toFixed(2);
+                return { name: item.model, change: change };
+            });
+
             // Trigger Counter Animation
             animateCounters();
         }
@@ -2294,13 +2300,31 @@
             const today = new Date();
             const dayNumber = Math.ceil((today - experimentStart) / (1000 * 60 * 60 * 24));
 
-            const leader = window.leaderInfo || { name: 'AI', change: '0' };
-            const sign = parseFloat(leader.change) >= 0 ? '+' : '';
+            // Get rankings data
+            const rankings = window.allRankings || [
+                { name: 'ChatGPT', change: '0' },
+                { name: 'Gemini', change: '0' },
+                { name: 'Claude', change: '0' },
+                { name: 'Perplexity', change: '0' }
+            ];
 
-            const tweetText = `Day ${dayNumber} of the AI Portfolio Experiment: ${leader.name} leads with ${sign}${leader.change}% performance. 📈\n\nWho will win the ultimate AI challenge?\n\nhttps://seve1995.github.io/ai-portfolio-experiment/\n\n#AI #Investing #ChatGPT #Gemini #Claude #Perplexity`;
+            // Format each ranking with medal emojis
+            const medals = ['🥇', '🥈', '🥉', '4️⃣'];
+            const leaderboard = rankings.map((item, idx) => {
+                const sign = parseFloat(item.change) >= 0 ? '+' : '';
+                return `${medals[idx]} ${item.name}: ${sign}${item.change}%`;
+            }).join('\n');
+
+            const tweetText = `🤖 AI Stock Battle — Day ${dayNumber}
+
+${leaderboard}
+
+Which AI will win? Follow the live experiment 👇
+
+https://seve1995.github.io/ai-portfolio-experiment/`;
 
             const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
-            window.open(tweetUrl, '_blank', 'width=550,height=420');
+            window.open(tweetUrl, '_blank', 'width=550,height=480');
         }
 
         // Countdown timer
