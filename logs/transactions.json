@@ -1,6 +1,33 @@
 {
   "ChatGPT": [
     {
+      "symbol": "NVAX",
+      "side": "buy",
+      "qty": 14.0,
+      "price": 7.44,
+      "timestamp": "2026-01-09T14:30:57.781671+00:00",
+      "type": "limit",
+      "id": "3983b3db-595c-4613-9857-ad66bb6bdf78"
+    },
+    {
+      "symbol": "AQST",
+      "side": "sell",
+      "qty": 23.0,
+      "price": 4.011739,
+      "timestamp": "2026-01-09T14:31:36.126867+00:00",
+      "type": "market",
+      "id": "569eae5d-5072-4e96-b6f6-1d6a94b74266"
+    },
+    {
+      "symbol": "UAA",
+      "side": "buy",
+      "qty": 14.0,
+      "price": 5.78,
+      "timestamp": "2026-01-09T15:03:17.200752+00:00",
+      "type": "limit",
+      "id": "596b932a-33d7-4b91-ba0f-fda7e2f3ac77"
+    },
+    {
       "symbol": "RIVN",
       "side": "sell",
       "qty": 18.0,
@@ -29,6 +56,24 @@
     }
   ],
   "Gemini": [
+    {
+      "symbol": "RIOT",
+      "side": "buy",
+      "qty": 13.0,
+      "price": 15.25,
+      "timestamp": "2026-01-09T20:00:28.320399+00:00",
+      "type": "limit",
+      "id": "e711b985-43b3-4c14-931c-273d615561db"
+    },
+    {
+      "symbol": "UPST",
+      "side": "buy",
+      "qty": 4.0,
+      "price": 50.1,
+      "timestamp": "2026-01-09T14:49:07.161832+00:00",
+      "type": "limit",
+      "id": "9a64e234-453d-46e4-9e36-03033754d7db"
+    },
     {
       "symbol": "SEDG",
       "side": "sell",
@@ -87,6 +132,15 @@
   "Claude": [
     {
       "symbol": "AQST",
+      "side": "sell",
+      "qty": 37.0,
+      "price": 4.028649,
+      "timestamp": "2026-01-09T14:31:18.635735+00:00",
+      "type": "market",
+      "id": "21205f4d-0bdc-438f-9dc8-9f907182e937"
+    },
+    {
+      "symbol": "AQST",
       "side": "buy",
       "qty": 37.0,
       "price": 6.25,
@@ -96,6 +150,15 @@
     }
   ],
   "Perplexity": [
+    {
+      "symbol": "APLD",
+      "side": "sell",
+      "qty": 3.0,
+      "price": 36.88,
+      "timestamp": "2026-01-09T16:50:19.327151+00:00",
+      "type": "limit",
+      "id": "1b7a20ed-2fdd-43c9-8821-6b9f02866854"
+    },
     {
       "symbol": "APLD",
       "side": "buy",

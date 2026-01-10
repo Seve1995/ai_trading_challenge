@@ -186,5 +186,77 @@
         }
       ]
     }
+  },
+  "2026-01-09": {
+    "ChatGPT": {
+      "equity": 939.79,
+      "cash": 758.63,
+      "buying_power": 758.63,
+      "positions": [
+        {
+          "ticker": "NVAX",
+          "qty": 14.0,
+          "avg_cost": 7.44,
+          "current_price": 7.315,
+          "market_value": 102.41,
+          "unrealized_pl": -1.75,
+          "unrealized_pl_pct": -1.68010752688172,
+          "sector": "Healthcare",
+          "industry": "Biotechnology"
+        },
+        {
+          "ticker": "UAA",
+          "qty": 14.0,
+          "avg_cost": 5.78,
+          "current_price": 5.625,
+          "market_value": 78.75,
+          "unrealized_pl": -2.17,
+          "unrealized_pl_pct": -2.68166089965398,
+          "sector": "Consumer Cyclical",
+          "industry": "Apparel Manufacturing"
+        }
+      ]
+    },
+    "Gemini": {
+      "equity": 995.64,
+      "cash": 600.31,
+      "buying_power": 600.31,
+      "positions": [
+        {
+          "ticker": "RIOT",
+          "qty": 13.0,
+          "avg_cost": 15.25,
+          "current_price": 15.25,
+          "market_value": 198.25,
+          "unrealized_pl": 0.0,
+          "unrealized_pl_pct": 0.0,
+          "sector": "Financial Services",
+          "industry": "Capital Markets"
+        },
+        {
+          "ticker": "UPST",
+          "qty": 4.0,
+          "avg_cost": 50.1,
+          "current_price": 49.269,
+          "market_value": 197.076,
+          "unrealized_pl": -3.324,
+          "unrealized_pl_pct": -1.65868263473054,
+          "sector": "Financial Services",
+          "industry": "Credit Services"
+        }
+      ]
+    },
+    "Claude": {
+      "equity": 917.8,
+      "cash": 917.8,
+      "buying_power": 917.8,
+      "positions": []
+    },
+    "Perplexity": {
+      "equity": 1023.81,
+      "cash": 1023.81,
+      "buying_power": 1023.81,
+      "positions": []
+    }
   }
 }

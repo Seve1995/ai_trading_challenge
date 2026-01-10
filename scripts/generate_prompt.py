@@ -95,19 +95,20 @@ def get_macro_data():
 # -------------------------------------------------
 # Technical Data for Holdings
 # -------------------------------------------------
-def get_technical_data(symbol: str) -> str:
+def get_technical_data(symbol: str) -> tuple:
     """
     Uses last daily close + 20SMA + 50SMA.
     Data source: Yahoo Finance, daily bars only.
+    Returns: (tech_string, last_close) tuple
     """
     try:
         hist = yf.Ticker(symbol).history(period="6mo")
         if hist is None or len(hist) < 55:
-            return "N/A (Insufficient history)"
+            return "N/A (Insufficient history)", None
 
         closes = hist["Close"].dropna()
         if len(closes) < 55:
-            return "N/A (Insufficient close data)"
+            return "N/A (Insufficient close data)", None
 
         last_close = float(closes.iloc[-1])
         sma_20 = closes.rolling(20).mean().iloc[-1]
@@ -123,14 +124,15 @@ def get_technical_data(symbol: str) -> str:
         else:
             trend = "BELOW_20"
 
-        return (
+        tech_str = (
             f"LastClose ${last_close:.2f} | "
             f"20SMA ${sma_20:.2f} | "
             f"50SMA ${sma_50:.2f} | "
             f"Trend {trend}"
         )
+        return tech_str, last_close
     except Exception as e:
-        return f"Data Error ({e})"
+        return f"Data Error ({e})", None
 
 # -------------------------------------------------
 # Prompt Generator
@@ -159,11 +161,16 @@ def generate_daily_prompt():
     if positions:
         print(f"   ... Fetching Technicals for {len(positions)} positions ...")
         for p in positions:
-            tech = get_technical_data(p.symbol)
-            pnl = float(p.unrealized_plpc) * 100
+            tech_str, last_close = get_technical_data(p.symbol)
+            entry_price = float(p.avg_entry_price)
+            # Calculate PnL from entry price vs last close (more reliable than Alpaca's unrealized_plpc)
+            if last_close and entry_price > 0:
+                pnl = ((last_close - entry_price) / entry_price) * 100
+            else:
+                pnl = float(p.unrealized_plpc) * 100  # fallback to Alpaca's value
             holdings_lines.append(
-                f"- {p.symbol}: Qty {p.qty} | Entry ${float(p.avg_entry_price):.2f} | "
-                f"PnL {pnl:.2f}% | Last Close Data: {tech}"
+                f"- {p.symbol}: Qty {p.qty} | Entry ${entry_price:.2f} | "
+                f"PnL {pnl:.2f}% | Last Close Data: {tech_str}"
             )
         holdings_txt = "\n".join(holdings_lines)
     else:
