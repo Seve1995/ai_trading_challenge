@@ -1677,12 +1677,13 @@
             const textEl = document.getElementById('snapshotBtnText');
             const iconEl = document.getElementById('snapshotBtnIcon');
 
-            // Check if Web Share API with files is likely supported (mobile)
-            const isMobileShareCapable = navigator.canShare && navigator.canShare({
+            // Check if truly on mobile device (user agent) AND supports Web Share with files
+            const isMobileDevice = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const canShareFiles = navigator.canShare && navigator.canShare({
                 files: [new File([''], 'test.png', { type: 'image/png' })]
             });
 
-            if (isMobileShareCapable) {
+            if (isMobileDevice && canShareFiles) {
                 textEl.textContent = 'Share Chart';
                 iconEl.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
@@ -2255,8 +2256,7 @@
                             ctx.fillRect(0, 0, c.width, c.height);
                             ctx.restore();
                         }
-                    },
-                    glowPlugin // Reuse the glow effect
+                    }
                 ]
             });
 
@@ -2327,8 +2327,11 @@
 
                     const file = new File([blob], filename, { type: 'image/png' });
 
-                    // Check if Web Share API with files is supported (mobile)
-                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    // Check if truly on mobile device AND supports Web Share with files
+                    const isMobileDevice = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                    const canShareFiles = navigator.canShare && navigator.canShare({ files: [file] });
+
+                    if (isMobileDevice && canShareFiles) {
                         try {
                             await navigator.share({
                                 files: [file],
@@ -2336,14 +2339,12 @@
                                 text: 'Check out the AI Portfolio Experiment standings!'
                             });
                         } catch (err) {
-                            // User cancelled or error - fall back to download
-                            if (err.name !== 'AbortError') {
-                                console.log('Share failed, falling back to download:', err);
-                                triggerDownload(blob, filename);
-                            }
+                            // User cancelled or error - always fall back to download
+                            console.log('Share cancelled or failed, falling back to download:', err);
+                            triggerDownload(blob, filename);
                         }
                     } else {
-                        // Desktop: Use traditional download
+                        // Desktop or non-sharing device: Use traditional download
                         triggerDownload(blob, filename);
                     }
 
@@ -2359,7 +2360,8 @@
             link.download = filename;
             link.href = url;
             link.click();
-            URL.revokeObjectURL(url);
+            // Delay revocation to give browser time to start download
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
         }
 
         // Twitter share function
