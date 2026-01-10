@@ -1302,70 +1302,135 @@
                 box-shadow: 0 0 0 0 rgba(248, 81, 73, 0);
             }
         }
+
+        /* Media Queries for Responsiveness */
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 10px;
+            }
+
+            header {
+                margin-bottom: 30px;
+            }
+
+            .chart-container {
+                padding: 20px 15px;
+            }
+
+            .chart-header {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 20px !important;
+            }
+
+            .chart-controls {
+                width: 100% !important;
+                justify-content: space-between !important;
+            }
+
+            .chart-wrapper {
+                height: 350px;
+            }
+
+            .custom-legend {
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+
+            .legend-item {
+                font-size: 11px !important;
+            }
+
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            .subtitle {
+                font-size: 0.95rem;
+                text-align: center;
+            }
+
+            .header-links {
+                margin-left: 0;
+                margin-top: 10px;
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .chart-wrapper {
+                height: 300px;
+            }
+
+            .stat-card {
+                padding: 20px;
+            }
+
+            .stat-card .value {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Donut Charts Grid */
+        .donuts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            justify-items: center;
+        }
+
+        .donut-wrapper {
+            text-align: center;
+            width: 100%;
+            max-width: 250px;
+        }
+
+        .donut-wrapper h5 {
+            font-size: 1rem;
+            margin-bottom: 15px;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+        }
+
+        /* Ticker Styles (Inline Badge) */
+        .experiment-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(128, 128, 128, 0.1);
+            border: 1px solid var(--glass-border);
+            padding: 6px 16px;
+            border-radius: 99px;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            margin-top: 16px;
+            margin-bottom: 8px;
+            backdrop-filter: blur(4px);
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background-color: #f85149;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #f85149;
+            animation: pulse-red 1.5s infinite;
+        }
+
+        .ticker-highlight {
+            color: var(--text-main);
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            margin-left: 4px;
+        }
     </style>
-</head>
-</style>
-<style>
-    /* Donut Charts Grid */
-    .donuts-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 30px;
-        justify-items: center;
-    }
-
-    .donut-wrapper {
-        text-align: center;
-        width: 100%;
-        max-width: 250px;
-    }
-
-    .donut-wrapper h5 {
-        font-size: 1rem;
-        margin-bottom: 15px;
-        color: var(--text-main);
-        font-weight: 600;
-    }
-
-    .canvas-container {
-        position: relative;
-        width: 100%;
-        aspect-ratio: 1;
-    }
-
-    /* Ticker Styles */
-    /* Ticker Styles (Inline Badge) */
-    .experiment-status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: rgba(128, 128, 128, 0.1);
-        border: 1px solid var(--glass-border);
-        padding: 6px 16px;
-        border-radius: 99px;
-        font-size: 0.85rem;
-        color: var(--text-dim);
-        margin-top: 16px;
-        margin-bottom: 8px;
-        backdrop-filter: blur(4px);
-    }
-
-    .status-dot {
-        width: 6px;
-        height: 6px;
-        background-color: #f85149;
-        border-radius: 50%;
-        box-shadow: 0 0 8px #f85149;
-        animation: pulse-red 1.5s infinite;
-    }
-
-    .ticker-highlight {
-        color: var(--text-main);
-        font-weight: 600;
-        font-family: 'JetBrains Mono', monospace;
-        margin-left: 4px;
-    }
-</style>
 </head>
 
 <body>
@@ -1482,7 +1547,7 @@
                     </p>
                     <p id="dateRange" style="font-size: 0.75rem; color: var(--text-dim); margin-top: 2px;"></p>
                 </div>
-                <div style="display: flex; gap: 15px; align-items: center;">
+                <div class="chart-controls" style="display: flex; gap: 15px; align-items: center;">
                     <div class="segmented-control">
                         <button class="segment-btn active" data-scale="dynamic"
                             onclick="setYScale('dynamic')">Dynamic</button>
@@ -2085,59 +2150,142 @@
 
         // Snapshot Function (The "Viral" Image Exporter)
         function takeSnapshot() {
-            const canvas = document.getElementById('performanceChart');
-            const tempCanvas = document.createElement('canvas');
-            const tCtx = tempCanvas.getContext('2d');
+            if (!chart) return;
 
-            // Set dimensions for high-quality export
-            tempCanvas.width = 1200;
-            tempCanvas.height = 800;
+            // 1. Create a hidden high-res canvas for the chart itself
+            // We use a fixed 2000x1200 size for the chart component to ensure sharpness
+            const exportChartCanvas = document.createElement('canvas');
+            exportChartCanvas.width = 2000;
+            exportChartCanvas.height = 1200;
+            const ecCtx = exportChartCanvas.getContext('2d');
 
-            // 1. Draw Background
+            // 2. Create the final composite canvas (1200x800 for social media optimization)
+            const finalCanvas = document.createElement('canvas');
+            finalCanvas.width = 1200;
+            finalCanvas.height = 800;
+            const fCtx = finalCanvas.getContext('2d');
+
             const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            tCtx.fillStyle = isDark ? '#05070a' : '#f8fafc';
-            tCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+            const bgColor = isDark ? '#05070a' : '#f8fafc';
+            const textColor = isDark ? '#ffffff' : '#0f172a';
+            const dimColor = isDark ? '#9198a1' : '#64748b';
 
-            // Add subtle mesh gradient circles to export
-            tCtx.globalAlpha = 0.1;
-            const grad1 = tCtx.createRadialGradient(0, 0, 0, 0, 0, 800);
-            grad1.addColorStop(0, '#00f2ff');
-            grad1.addColorStop(1, 'transparent');
-            tCtx.fillStyle = grad1;
-            tCtx.beginPath();
-            tCtx.arc(0, 0, 800, 0, Math.PI * 2);
-            tCtx.fill();
+            // 3. Render a "Snapshot Version" of the chart to the offscreen canvas
+            // We clone the data and options to maintain visual parity but at a fixed high res
+            const snapshotChart = new Chart(ecCtx, {
+                type: 'line',
+                data: JSON.parse(JSON.stringify(chart.data)), // Deep clone data
+                options: {
+                    ...chart.options,
+                    responsive: false,
+                    maintainAspectRatio: false,
+                    animation: false,
+                    devicePixelRatio: 2, // High DPI
+                    plugins: {
+                        ...chart.options.plugins,
+                        legend: { display: false },
+                        tooltip: { enabled: false },
+                        customCanvasBackground: { color: bgColor }
+                    },
+                    scales: {
+                        y: {
+                            ...chart.options.scales.y,
+                            ticks: {
+                                ...chart.options.scales.y.ticks,
+                                font: { size: 14, family: 'JetBrains Mono, monospace', weight: '500' },
+                                color: dimColor
+                            },
+                            grid: { color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }
+                        },
+                        x: {
+                            ...chart.options.scales.x,
+                            ticks: {
+                                ...chart.options.scales.x.ticks,
+                                font: { size: 14, family: 'JetBrains Mono, monospace', weight: '500' },
+                                color: dimColor
+                            }
+                        }
+                    }
+                },
+                plugins: [
+                    {
+                        id: 'customBg',
+                        beforeDraw: (c) => {
+                            const ctx = c.ctx;
+                            ctx.save();
+                            ctx.fillStyle = bgColor;
+                            ctx.fillRect(0, 0, c.width, c.height);
+                            ctx.restore();
+                        }
+                    },
+                    glowPlugin // Reuse the glow effect
+                ]
+            });
 
-            tCtx.globalAlpha = 1.0;
+            // Wait for chart to be ready (even without animation, Chart.js might need a tick)
+            setTimeout(() => {
+                // 4. Draw Background on Final Canvas
+                fCtx.fillStyle = bgColor;
+                fCtx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
 
-            // 2. Draw Header Branding
-            tCtx.fillStyle = isDark ? '#ffffff' : '#0f172a';
-            tCtx.font = '700 40px Outfit, sans-serif';
-            tCtx.fillText('AI PORTFOLIO EXPERIMENT', 60, 100);
+                // Add subtle mesh gradient/glows
+                fCtx.globalAlpha = 0.15;
+                const grad = fCtx.createRadialGradient(0, 0, 0, 0, 0, 1000);
+                grad.addColorStop(0, '#00f2ff');
+                grad.addColorStop(1, 'transparent');
+                fCtx.fillStyle = grad;
+                fCtx.beginPath();
+                fCtx.arc(0, 0, 1000, 0, Math.PI * 2);
+                fCtx.fill();
+                fCtx.globalAlpha = 1.0;
 
-            tCtx.font = '400 20px Outfit, sans-serif';
-            tCtx.fillStyle = isDark ? '#9198a1' : '#64748b';
-            tCtx.fillText('Comparing 4 AI Models with $1,000 each', 60, 140);
+                // 5. Draw Header Branding
+                fCtx.fillStyle = textColor;
+                fCtx.font = '700 42px Outfit, sans-serif';
+                fCtx.fillText('AI PORTFOLIO EXPERIMENT', 60, 100);
 
-            // 3. Draw the Chart
-            // We use the original canvas but scaled to fit
-            const chartImage = new Image();
-            chartImage.src = canvas.toDataURL('image/png');
-            chartImage.onload = function () {
-                tCtx.drawImage(chartImage, 60, 200, 1080, 500);
+                fCtx.font = '400 22px Outfit, sans-serif';
+                fCtx.fillStyle = dimColor;
+                fCtx.fillText('Comparing 4 AI Models with $1,000 each', 60, 145);
 
-                // 4. Branding Footer
-                tCtx.fillStyle = isDark ? '#ffffff' : '#0f172a';
-                tCtx.font = '600 16px Outfit, sans-serif';
-                tCtx.textAlign = 'right';
-                tCtx.fillText('aiportfolioexperiment.substack.com', 1140, 750);
+                // 6. Composite the Chart
+                fCtx.drawImage(exportChartCanvas, 40, 180, 1120, 520);
 
-                // Trigger Download
+                // 7. Draw the Legend manually for perfect alignment
+                const legendXStart = 60;
+                const legendY = 720;
+                let currentX = legendXStart;
+
+                modelOrder.forEach(model => {
+                    const label = modelVersions[model];
+                    fCtx.fillStyle = colors[model];
+                    fCtx.beginPath();
+                    fCtx.arc(currentX, legendY - 6, 6, 0, Math.PI * 2);
+                    fCtx.fill();
+
+                    fCtx.fillStyle = dimColor;
+                    fCtx.font = '600 16px Outfit, sans-serif';
+                    fCtx.fillText(label, currentX + 15, legendY);
+
+                    const textWidth = fCtx.measureText(label).width;
+                    currentX += textWidth + 60;
+                });
+
+                // 8. Branding Footer
+                fCtx.fillStyle = dimColor;
+                fCtx.font = '600 16px Outfit, sans-serif';
+                fCtx.textAlign = 'right';
+                fCtx.fillText('aiportfolioexperiment.substack.com', 1140, 760);
+
+                // 9. Trigger Download
                 const link = document.createElement('a');
                 link.download = `AI-Portfolio-Snapshot-${new Date().toISOString().split('T')[0]}.png`;
-                link.href = tempCanvas.toDataURL('image/png', 1.0);
+                link.href = finalCanvas.toDataURL('image/png', 1.0);
                 link.click();
-            };
+
+                // Cleanup
+                snapshotChart.destroy();
+            }, 100);
         }
 
         // Twitter share function
