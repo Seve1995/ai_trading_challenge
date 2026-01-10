@@ -2209,40 +2209,59 @@
             const textColor = isDark ? '#ffffff' : '#0f172a';
             const dimColor = isDark ? '#9198a1' : '#64748b';
 
-            // 3. Render a "Snapshot Version" of the chart to the offscreen canvas
-            // We clone the data and options to maintain visual parity but at a fixed high res
+            // 3. Clone datasets and recreate gradients (JSON.stringify breaks gradient objects)
+            const clonedDatasets = chart.data.datasets.map(ds => {
+                const color = colors[ds.label];
+                const gradient = ecCtx.createLinearGradient(0, 0, 0, 1200);
+                gradient.addColorStop(0, color + '44');
+                gradient.addColorStop(1, color + '00');
+
+                return {
+                    label: ds.label,
+                    data: [...ds.data],
+                    borderColor: color,
+                    backgroundColor: gradient,
+                    fill: true,
+                    cubicInterpolationMode: 'monotone',
+                    tension: 0.4,
+                    pointRadius: 0,
+                    borderWidth: 3
+                };
+            });
+
+            // 4. Render a "Snapshot Version" of the chart to the offscreen canvas
             const snapshotChart = new Chart(ecCtx, {
                 type: 'line',
-                data: JSON.parse(JSON.stringify(chart.data)), // Deep clone data
+                data: {
+                    labels: [...chart.data.labels],
+                    datasets: clonedDatasets
+                },
                 options: {
-                    ...chart.options,
                     responsive: false,
                     maintainAspectRatio: false,
                     animation: false,
-                    devicePixelRatio: 2, // High DPI
+                    devicePixelRatio: 2,
                     plugins: {
-                        ...chart.options.plugins,
                         legend: { display: false },
-                        tooltip: { enabled: false },
-                        customCanvasBackground: { color: bgColor }
+                        tooltip: { enabled: false }
                     },
                     scales: {
                         y: {
-                            ...chart.options.scales.y,
+                            beginAtZero: false,
+                            grace: '10%',
                             ticks: {
-                                ...chart.options.scales.y.ticks,
                                 font: { size: 14, family: 'JetBrains Mono, monospace', weight: '500' },
-                                color: dimColor
+                                color: dimColor,
+                                callback: (value) => '$' + value.toLocaleString()
                             },
                             grid: { color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }
                         },
                         x: {
-                            ...chart.options.scales.x,
                             ticks: {
-                                ...chart.options.scales.x.ticks,
                                 font: { size: 14, family: 'JetBrains Mono, monospace', weight: '500' },
                                 color: dimColor
-                            }
+                            },
+                            grid: { display: false }
                         }
                     }
                 },
