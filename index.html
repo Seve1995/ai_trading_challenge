@@ -2192,16 +2192,16 @@
             if (!chart) return;
 
             // 1. Create a hidden high-res canvas for the chart itself
-            // We use a fixed 2000x1200 size for the chart component to ensure sharpness
+            // Using 3000x1800 for crisp chart rendering
             const exportChartCanvas = document.createElement('canvas');
-            exportChartCanvas.width = 2000;
-            exportChartCanvas.height = 1200;
+            exportChartCanvas.width = 3000;
+            exportChartCanvas.height = 1800;
             const ecCtx = exportChartCanvas.getContext('2d');
 
-            // 2. Create the final composite canvas (1200x800 for social media optimization)
+            // 2. Create the final composite canvas (2400x1600 for high-res social media)
             const finalCanvas = document.createElement('canvas');
-            finalCanvas.width = 1200;
-            finalCanvas.height = 800;
+            finalCanvas.width = 2400;
+            finalCanvas.height = 1600;
             const fCtx = finalCanvas.getContext('2d');
 
             const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -2212,7 +2212,7 @@
             // 3. Clone datasets and recreate gradients (JSON.stringify breaks gradient objects)
             const clonedDatasets = chart.data.datasets.map(ds => {
                 const color = colors[ds.label];
-                const gradient = ecCtx.createLinearGradient(0, 0, 0, 1200);
+                const gradient = ecCtx.createLinearGradient(0, 0, 0, 1800);
                 gradient.addColorStop(0, color + '44');
                 gradient.addColorStop(1, color + '00');
 
@@ -2287,52 +2287,52 @@
 
                 // Add subtle mesh gradient/glows
                 fCtx.globalAlpha = 0.15;
-                const grad = fCtx.createRadialGradient(0, 0, 0, 0, 0, 1000);
+                const grad = fCtx.createRadialGradient(0, 0, 0, 0, 0, 2000);
                 grad.addColorStop(0, '#00f2ff');
                 grad.addColorStop(1, 'transparent');
                 fCtx.fillStyle = grad;
                 fCtx.beginPath();
-                fCtx.arc(0, 0, 1000, 0, Math.PI * 2);
+                fCtx.arc(0, 0, 2000, 0, Math.PI * 2);
                 fCtx.fill();
                 fCtx.globalAlpha = 1.0;
 
-                // 5. Draw Header Branding
+                // 5. Draw Header Branding (scaled 2x for high-res)
                 fCtx.fillStyle = textColor;
-                fCtx.font = '700 42px Outfit, sans-serif';
-                fCtx.fillText('AI PORTFOLIO EXPERIMENT', 60, 100);
+                fCtx.font = '700 84px Outfit, sans-serif';
+                fCtx.fillText('AI PORTFOLIO EXPERIMENT', 120, 200);
 
-                fCtx.font = '400 22px Outfit, sans-serif';
+                fCtx.font = '400 44px Outfit, sans-serif';
                 fCtx.fillStyle = dimColor;
-                fCtx.fillText('Comparing 4 AI Models with $1,000 each', 60, 145);
+                fCtx.fillText('Comparing 4 AI Models with $1,000 each', 120, 290);
 
-                // 6. Composite the Chart
-                fCtx.drawImage(exportChartCanvas, 40, 180, 1120, 520);
+                // 6. Composite the Chart (scaled 2x)
+                fCtx.drawImage(exportChartCanvas, 80, 360, 2240, 1040);
 
-                // 7. Draw the Legend manually for perfect alignment
-                const legendXStart = 60;
-                const legendY = 720;
+                // 7. Draw the Legend manually for perfect alignment (scaled 2x)
+                const legendXStart = 120;
+                const legendY = 1440;
                 let currentX = legendXStart;
 
                 modelOrder.forEach(model => {
                     const label = modelVersions[model];
                     fCtx.fillStyle = colors[model];
                     fCtx.beginPath();
-                    fCtx.arc(currentX, legendY - 6, 6, 0, Math.PI * 2);
+                    fCtx.arc(currentX, legendY - 12, 12, 0, Math.PI * 2);
                     fCtx.fill();
 
                     fCtx.fillStyle = dimColor;
-                    fCtx.font = '600 16px Outfit, sans-serif';
-                    fCtx.fillText(label, currentX + 15, legendY);
+                    fCtx.font = '600 32px Outfit, sans-serif';
+                    fCtx.fillText(label, currentX + 30, legendY);
 
                     const textWidth = fCtx.measureText(label).width;
-                    currentX += textWidth + 60;
+                    currentX += textWidth + 120;
                 });
 
-                // 8. Branding Footer
+                // 8. Branding Footer (scaled 2x)
                 fCtx.fillStyle = dimColor;
-                fCtx.font = '600 16px Outfit, sans-serif';
+                fCtx.font = '600 32px Outfit, sans-serif';
                 fCtx.textAlign = 'right';
-                fCtx.fillText('aiportfolioexperiment.substack.com', 1140, 760);
+                fCtx.fillText('aiportfolioexperiment.substack.com', 2280, 1520);
 
                 // 9. Share or Download
                 const filename = `AI-Portfolio-Snapshot-${new Date().toISOString().split('T')[0]}.png`;
